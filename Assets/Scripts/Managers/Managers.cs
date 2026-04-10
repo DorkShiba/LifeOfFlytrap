@@ -5,6 +5,7 @@ using UnityEngine;
 public class Managers : MonoBehaviour {
     static Managers _instance;
     private static Managers Instance { get { Init(); return _instance; } }
+    private static bool isQuitting = false;
 
     // #region Content
     // CameraManager _camera = new CameraManager();
@@ -19,26 +20,30 @@ public class Managers : MonoBehaviour {
     InputManager _input;
     // OptionsManager _options = new OptionsManager();
     PoolManager _pool;
-    // ResourceManager _resource = new ResourceManager();
+    ResourceManager _resource = new ResourceManager();
     // SceneManagerEx _scene = new SceneManagerEx();
     // SoundManager _sound = new SoundManager();
-    // UIManager _ui = new UIManager();
-    ObjectManager _object;
+    UIManager _ui = new UIManager();
+    TrapLogicManager _trapLogic;
 
     void Awake()
     {
         Init();
     }
 
+    void OnApplicationQuit() {
+        isQuitting = true;
+    }
+
     // public static DataManager Data { get { return Instance._data; } }
-    public static InputManager Input { get { return Instance._input; } }
+    public static InputManager Input { get { return isQuitting ? null : Instance._input; } }
     // public static OptionsManager Options { get { return Instance._options; } }
-    public static PoolManager Pool { get { return Instance._pool; } }
-    // public static ResourceManager Resource { get { return Instance._resource; } }
+    public static PoolManager Pool { get { return isQuitting? null: Instance._pool; } }
+    public static ResourceManager Resource { get { return isQuitting? null: Instance._resource; } }
     // public static SceneManagerEx Scene { get { return Instance._scene; } }
     // public static SoundManager Sound { get { return Instance._sound; } }
-    // public static UIManager UI { get { return Instance._ui; } }
-    public static ObjectManager Object { get { return Instance._object; } }
+    public static UIManager UI { get { return isQuitting? null: Instance._ui; } }
+    public static TrapLogicManager TrapLogic { get { return isQuitting? null: Instance._trapLogic; } }
     // #endregion
 
     public static Coroutine StartCoroutineManager(Func<IEnumerator> func) {
@@ -65,7 +70,7 @@ public class Managers : MonoBehaviour {
             // Awake에서 호출되므로 여기서는 실제 초기화만 진행
             if (_instance._input == null) _instance._input = new InputManager();
             if (_instance._pool == null) _instance._pool = new PoolManager();
-            if (_instance._object == null) _instance._object = new ObjectManager();
+            if (_instance._trapLogic == null) _instance._trapLogic = new TrapLogicManager();
 
             // Data.Init();
             // Scene.Init();

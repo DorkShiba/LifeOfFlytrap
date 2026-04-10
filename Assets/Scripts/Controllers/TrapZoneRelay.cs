@@ -11,6 +11,8 @@ public class TrapZoneRelay : MonoBehaviour
     [SerializeField] private TrapController trap;
     [SerializeField] private TrapZoneType zoneType;
 
+    public TrapZoneType ZoneType => zoneType;
+
     private void Awake()
     {
         if (trap == null)
@@ -40,5 +42,7 @@ public class TrapZoneRelay : MonoBehaviour
 
         if (zoneType == TrapZoneType.Sense)
             trap.HandleSenseExit(other);
+        if (zoneType == TrapZoneType.Bite)
+            trap.HandleBiteExit(other);
     }
 }

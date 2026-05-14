@@ -9,12 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71c3c4e5d20b70f45827b38dabcbfd8e, type: 3}
+  m_Script: {fileID: 11500000, guid: 013093688a5410d42b82a7b5427c08a3, type: 3}
   m_Name: FlyData
-  m_EditorClassIdentifier: Assembly-CSharp::BugData
-  speed: 3
+  m_EditorClassIdentifier: Assembly-CSharp::FlyData
+  speed: 20
+  accelerationSmoothTime: 0.18
+  energy: 5
+  digestionTime: 8
+  hp: 1
   wanderRadius: 1
   wanderDistance: 1.5
   wanderJitter: 0.15
   wanderWeight: 0.7
   attractionWeight: 0.3
+  arrivalRange: 10
+  minSpeed: 0.2
+  capturedStayTime: 3
+  captureDecisionChance: 0.3

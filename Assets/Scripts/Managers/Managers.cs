@@ -25,6 +25,7 @@ public class Managers : MonoBehaviour {
     // SoundManager _sound = new SoundManager();
     UIManager _ui = new UIManager();
     TrapLogicManager _trapLogic;
+    GameManager _game;
 
     void Awake()
     {
@@ -44,6 +45,7 @@ public class Managers : MonoBehaviour {
     // public static SoundManager Sound { get { return Instance._sound; } }
     public static UIManager UI { get { return isQuitting? null: Instance._ui; } }
     public static TrapLogicManager TrapLogic { get { return isQuitting? null: Instance._trapLogic; } }
+    public static GameManager Game { get { return isQuitting? null: Instance._game; } }
     // #endregion
 
     public static Coroutine StartCoroutineManager(Func<IEnumerator> func) {
@@ -87,6 +89,7 @@ public class Managers : MonoBehaviour {
 
         // Combat.Update();
         // Camera.Update();
+        Game.Update(Time.deltaTime);
     }
 
     public static void Clear() {

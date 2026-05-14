@@ -8,18 +8,19 @@ public class TrapController : MonoBehaviour
     [SerializeField] public Action<BugController> onBugSensed;
     [SerializeField] public Action<BugController> onBugEscaped;
     [SerializeField] public Action<BugController> onBugEaten;
+    [SerializeField] public Action<List<BugController>> onTrapClosed;
 
     [SerializeField] private List<BugController> OnBiteBugs = new List<BugController>();
     
     [SerializeField] private Animator anim;
     [SerializeField] private Collider2D sensorZoneCollider;
+    [SerializeField] private float biteComboTimeout = 0.2f;
 
     private float closeTime = 0.0f;
-    [SerializeField] private float attractionRange = 2.0f;
-    [SerializeField] private float attractionStrength = 5.0f;
-    public float AttractionRange => attractionRange;
-    public float AttractionStrength => attractionStrength;
+    private float biteComboTimer = 0.0f;
+    private bool waitingToClose = false;
 
+    private static readonly int BiteTriggerHash = Animator.StringToHash("bite");
     private static readonly int CloseTimeHash = Animator.StringToHash("closeTime");
 
     public int EatenBugCount { get; private set; } //
@@ -60,6 +61,30 @@ public class TrapController : MonoBehaviour
     void Update() {
         if (closeTime > Util.EPS) {
             closeTime -= Time.deltaTime;
+            if (anim != null)
+            {
+                anim.SetFloat(CloseTimeHash, closeTime);
+            }
+            return;
+        }
+
+        if (!waitingToClose)
+        {
+            return;
+        }
+
+        biteComboTimer += Time.deltaTime;
+        if (biteComboTimer < biteComboTimeout)
+        {
+            return;
+        }
+
+        waitingToClose = false;
+        biteComboTimer = 0.0f;
+
+        if (anim != null)
+        {
+            closeTime = 5.0f;
             anim.SetFloat(CloseTimeHash, closeTime);
         }
     }
@@ -135,18 +160,25 @@ public class TrapController : MonoBehaviour
 
         if (anim != null)
         {
-            closeTime = 5.0f; // Set close time to 5 seconds
-            anim.SetFloat(CloseTimeHash, closeTime);
+            anim.ResetTrigger(BiteTriggerHash);
+            anim.SetTrigger(BiteTriggerHash);
         }
 
-        BugController[] bugsToEat = OnBiteBugs.ToArray();
-        OnBiteBugs.Clear();
-        foreach (var bug in bugsToEat)
+        waitingToClose = true;
+        biteComboTimer = 0.0f;
+
+        BugController[] bugsToBite = OnBiteBugs.ToArray();
+        foreach (var bug in bugsToBite)
         {
             if (bug != null)
             {
-                onBugEaten?.Invoke(bug);
-                OnBiteBugs.Remove(bug);
+                bool isDead = bug.TakeDamage(PlantController.BiteDamage);
+                if (isDead)
+                {
+                    EatenBugCount++;
+                    OnBiteBugs.Remove(bug);
+                    onBugEaten?.Invoke(bug);
+                }
             }
         }
     }

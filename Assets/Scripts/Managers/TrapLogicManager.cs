@@ -33,10 +33,12 @@ public class TrapLogicManager
         trap.GetComponent<TrapController>().onBugSensed -= OnBugEnterSensor;
         trap.GetComponent<TrapController>().onBugEscaped -= OnBugExitSensor;
         trap.GetComponent<TrapController>().onBugEaten -= OnBugEaten;
+        trap.GetComponent<TrapController>().onTrapClosed -= OnTrapClosed;
 
         trap.GetComponent<TrapController>().onBugSensed += OnBugEnterSensor;
         trap.GetComponent<TrapController>().onBugEscaped += OnBugExitSensor;
         trap.GetComponent<TrapController>().onBugEaten += OnBugEaten;
+        trap.GetComponent<TrapController>().onTrapClosed += OnTrapClosed;
     }
 
     void OnBugEnterSensor(BugController bug)
@@ -52,5 +54,10 @@ public class TrapLogicManager
     void OnBugEaten(BugController bug)
     {
         bug.Die();
+    }
+
+    void OnTrapClosed(List<BugController> bugs)
+    {
+        
     }
 }

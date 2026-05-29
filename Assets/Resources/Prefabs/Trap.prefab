@@ -179,12 +179,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 6220422291000881654, guid: b52771a5f39e0ea458ff3a9b6c34f971, type: 3}
+  m_Sprite: {fileID: -581049059476650384, guid: 0801d5dbd3088cd46b45b6859da9283f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.984375, y: 0.90625}
+  m_Size: {x: 1.96875, y: 1.8125}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -248,9 +248,9 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0.036249995}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.03125, y: 1.84375}
-    newSize: {x: 0.984375, y: 0.90625}
+    pivot: {x: 0.5, y: 0.48}
+    oldSize: {x: 1.96875, y: 1.8125}
+    newSize: {x: 1.96875, y: 1.8125}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -272,8 +272,7 @@ MonoBehaviour:
   OnBiteBugs: []
   anim: {fileID: 8650385626663313677}
   sensorZoneCollider: {fileID: 0}
-  attractionRange: 2
-  attractionStrength: 5
+  biteComboTimeout: 0.2
 --- !u!114 &451290891664481325
 MonoBehaviour:
   m_ObjectHideFlags: 0

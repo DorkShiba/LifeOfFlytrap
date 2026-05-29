@@ -73,6 +73,7 @@ public class Managers : MonoBehaviour {
             if (_instance._input == null) _instance._input = new InputManager();
             if (_instance._pool == null) _instance._pool = new PoolManager();
             if (_instance._trapLogic == null) _instance._trapLogic = new TrapLogicManager();
+            if (_instance._game == null) _instance._game = new GameManager();
 
             // Data.Init();
             // Scene.Init();
@@ -90,6 +91,7 @@ public class Managers : MonoBehaviour {
         // Combat.Update();
         // Camera.Update();
         Game.Update(Time.deltaTime);
+        Input.Update();
     }
 
     public static void Clear() {

@@ -46,7 +46,7 @@ public class Fly : BugController
 
     void HandleWandering(float distanceToTrap)
     {
-        float closestTrapRange = PlantController.AttractionRange;
+        float closestTrapRange = PlantController.Data.AttractionRange;
         
         // 함정의 AttractionRange 내에 도달했다면 확률로 앉기로 결정
         if (distanceToTrap < closestTrapRange && Random.value < data.CaptureDecisionChance)
@@ -135,7 +135,7 @@ public class Fly : BugController
 
     void HandleEscaping(float distanceToTrap)
     {
-        float closestTrapRange = PlantController.AttractionRange;
+        float closestTrapRange = PlantController.Data.AttractionRange;
         
         // 함정의 AttractionRange에서 충분히 멀어졌으면 다시 Wandering으로 복귀
         if (distanceToTrap > closestTrapRange)
@@ -245,7 +245,7 @@ public class Fly : BugController
 
             Vector2 trapPos = trap.transform.position;
             float distance = Vector2.Distance(currentPos, trapPos);
-            float range = PlantController.AttractionRange;
+            float range = PlantController.Data.AttractionRange;
 
             if (range <= 0f || distance > range)
             {
@@ -254,7 +254,7 @@ public class Fly : BugController
 
             Vector2 direction = (trapPos - currentPos).normalized;
             float falloff = 1f - (distance / range);
-            attractionVector += direction * falloff * PlantController.AttractionStrength;
+            attractionVector += direction * falloff * PlantController.Data.AttractionStrength;
         }
 
         return attractionVector;

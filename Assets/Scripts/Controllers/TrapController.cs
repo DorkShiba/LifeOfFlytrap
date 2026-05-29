@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -11,19 +12,17 @@ public class TrapController : MonoBehaviour
     [SerializeField] public Action<List<BugController>> onTrapClosed;
 
     [SerializeField] private List<BugController> OnBiteBugs = new List<BugController>();
+    [SerializeField] private List<BugController> Preys = new List<BugController>();
     
     [SerializeField] private Animator anim;
     [SerializeField] private Collider2D sensorZoneCollider;
-    [SerializeField] private float biteComboTimeout = 0.2f;
+    [SerializeField] private float biteComboTimeout = 1.0f;
 
     private float closeTime = 0.0f;
-    private float biteComboTimer = 0.0f;
-    private bool waitingToClose = false;
+    private Coroutine biteComboTimerCoroutine;
 
-    private static readonly int BiteTriggerHash = Animator.StringToHash("bite");
+    private const string TrapBiteStateName = "TrapBite";
     private static readonly int CloseTimeHash = Animator.StringToHash("closeTime");
-
-    public int EatenBugCount { get; private set; } //
 
     void Awake()
     {
@@ -40,20 +39,26 @@ public class TrapController : MonoBehaviour
 
     void OnDisable()
     {
-        if (Managers.Input == null)
+        if (biteComboTimerCoroutine != null)
         {
-            return;
+            StopCoroutine(biteComboTimerCoroutine);
+            biteComboTimerCoroutine = null;
         }
+
+        if (Managers.Input == null) return;
 
         Managers.Input.OnClickPerformed -= Bite;
     }
 
     void OnDestroy()
     {
-        if (Managers.Input == null)
+        if (biteComboTimerCoroutine != null)
         {
-            return;
+            StopCoroutine(biteComboTimerCoroutine);
+            biteComboTimerCoroutine = null;
         }
+
+        if (Managers.Input == null) return;
 
         Managers.Input.OnClickPerformed -= Bite;
     }
@@ -61,52 +66,23 @@ public class TrapController : MonoBehaviour
     void Update() {
         if (closeTime > Util.EPS) {
             closeTime -= Time.deltaTime;
-            if (anim != null)
-            {
-                anim.SetFloat(CloseTimeHash, closeTime);
-            }
-            return;
-        }
-
-        if (!waitingToClose)
-        {
-            return;
-        }
-
-        biteComboTimer += Time.deltaTime;
-        if (biteComboTimer < biteComboTimeout)
-        {
-            return;
-        }
-
-        waitingToClose = false;
-        biteComboTimer = 0.0f;
-
-        if (anim != null)
-        {
-            closeTime = 5.0f;
-            anim.SetFloat(CloseTimeHash, closeTime);
+            if (anim != null) anim.SetFloat(CloseTimeHash, closeTime);
         }
     }
 
     private static BugController GetBugFromCollider(Collider2D other)
     {
-        if (other == null) {
-            return null;
-        }
+        if (other == null) return null;
 
         return other.GetComponentInParent<BugController>();
     }
 
     public void HandleSenseEnter(Collider2D other)
     {
-        if (other == null) {
-            return;
-        }
+        if (other == null) return;
         
         BugController bug = GetBugFromCollider(other);
-        if (bug == null)
-            return;
+        if (bug == null) return;
 
         onBugSensed?.Invoke(bug);
     }
@@ -114,8 +90,7 @@ public class TrapController : MonoBehaviour
     public void HandleSenseExit(Collider2D other)
     {
         BugController bug = GetBugFromCollider(other);
-        if (bug == null)
-            return;
+        if (bug == null) return;
 
         onBugEscaped?.Invoke(bug);
     }
@@ -123,16 +98,15 @@ public class TrapController : MonoBehaviour
     public void HandleBiteEnter(Collider2D other)
     {
         BugController bug = GetBugFromCollider(other);
-        if (bug == null)
-            return;
+        if (bug == null) return;
         if (!OnBiteBugs.Contains(bug)) OnBiteBugs.Add(bug);
     }
 
     public void HandleBiteExit(Collider2D other)
     {
         BugController bug = GetBugFromCollider(other);
-        if (bug == null)
-            return;
+        if (bug == null) return;
+
         if (OnBiteBugs.Contains(bug)) OnBiteBugs.Remove(bug);
     }
 
@@ -141,43 +115,57 @@ public class TrapController : MonoBehaviour
         TrapZoneRelay zoneRelays = GetComponent<TrapZoneRelay>();
 
         Collider2D zoneCollider = zoneRelays.GetComponent<Collider2D>();
-        if (zoneCollider != null)
-        {
-            return zoneCollider;
-        }
+        if (zoneCollider != null) return zoneCollider;
 
         return null;
     }
 
+    private IEnumerator BiteComboTimer()
+    {
+        yield return new WaitForSeconds(biteComboTimeout);
+
+        biteComboTimerCoroutine = null;
+        closeTime = 5.0f;
+
+        BugController[] eaten = Preys.ToArray();
+        foreach (var bug in eaten)
+        {
+            if (bug != null)
+            {
+                Preys.Remove(bug);
+                onBugEaten?.Invoke(bug);
+            }
+        }
+
+        if (anim != null) anim.SetFloat(CloseTimeHash, closeTime);
+    }
+
     public void Bite(Vector2 mousePosition)
     {
-        if (closeTime > Util.EPS) {
-            return;
-        }
+        // 닫혀있는 경우 물지 못함
+        if (closeTime > Util.EPS) return;
         
+        // 클릭 위치가 센서 범위 내에 있는지 확인
         sensorZoneCollider = FindSensorZoneCollider();
         if (sensorZoneCollider == null || !sensorZoneCollider.OverlapPoint(mousePosition)) return;
 
-        if (anim != null)
-        {
-            anim.ResetTrigger(BiteTriggerHash);
-            anim.SetTrigger(BiteTriggerHash);
-        }
+        // 물기 애니메이션 재생
+        if (anim != null) anim.Play(TrapBiteStateName, 0, 0f);
 
-        waitingToClose = true;
-        biteComboTimer = 0.0f;
+        // 연타 타이머 코루틴 초기화
+        if (biteComboTimerCoroutine != null) StopCoroutine(biteComboTimerCoroutine);
+        biteComboTimerCoroutine = StartCoroutine(BiteComboTimer());
 
         BugController[] bugsToBite = OnBiteBugs.ToArray();
         foreach (var bug in bugsToBite)
         {
             if (bug != null)
             {
-                bool isDead = bug.TakeDamage(PlantController.BiteDamage);
+                bool isDead = bug.TakeDamage(PlantController.Data.BiteDamage);
                 if (isDead)
                 {
-                    EatenBugCount++;
                     OnBiteBugs.Remove(bug);
-                    onBugEaten?.Invoke(bug);
+                    Preys.Add(bug);
                 }
             }
         }

@@ -12,8 +12,42 @@ public class UIManager {
             GameObject root = GameObject.Find("@UI_Root");
             if (root == null)
                 root = new GameObject { name = "@UI_Root" };
+            SetSceneCanvas(root, 0);
             return root.transform;
         }
+    }
+
+    public T InstantiateUI<T>(Transform parent = null, string name = null) where T : BaseUI {
+        if (string.IsNullOrEmpty(name))
+            name = typeof(T).Name;
+        if (parent == null)
+            parent = Root;
+        else if (parent != Root && parent.IsChildOf(Root) == false)
+            return null;
+
+        GameObject go = Managers.Resource.Instantiate($"UI/{name}", parent);
+
+        SetSceneCanvas(go, 0);
+
+        T ui = go.GetComponent<T>();
+        if (ui == null)
+            ui = go.AddComponent<T>();
+        ui.Init();
+
+        return ui;
+    }
+
+    public void DestroyUI(BaseUI ui) {
+        if (ui != null)
+            Managers.Resource.Destroy(ui.gameObject);
+    }
+    
+    public T GetUIByName<T>(string name) where T : BaseUI {
+        GameObject go = Util.FindChild(Root.gameObject, name, true);
+        if (go == null)
+            return null;
+
+        return go.GetComponent<T>();
     }
 
     public void SetSceneCanvas(GameObject go, int order) {
@@ -41,6 +75,10 @@ public class UIManager {
     public T MakeWorldSpaceUI<T>(Transform parent = null, string name = null) where T : BaseUI {
         if (string.IsNullOrEmpty(name))
             name = typeof(T).Name;
+        if (parent == null)
+            parent = Root;
+        else if (parent != Root && parent.IsChildOf(Root) == false)
+            return null;
 
         GameObject go = Managers.Resource.Instantiate($"UI/WorldSpace/{name}", parent);
 
@@ -50,6 +88,8 @@ public class UIManager {
         }
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.worldCamera = Camera.main;
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 0;
 
         T ui = go.GetComponent<T>();
         if (ui == null)
@@ -61,6 +101,10 @@ public class UIManager {
 
     public T MakeSubItem<T>(Transform parent = null, string name = null) where T : BaseUI {
         string path = typeof(T).Name;
+        if (parent == null)
+            parent = Root;
+        else if (parent != Root && parent.IsChildOf(Root) == false)
+            return null;
 
         GameObject go = Managers.Resource.Instantiate($"UI/SubItem/{path}", parent);
 
@@ -72,80 +116,5 @@ public class UIManager {
         ui.Init();
 
         return ui;
-    }
-
-    // public T ShowSceneUI<T>(string name = null) where T : SceneUI {
-    //     if (string.IsNullOrEmpty(name))
-    //         name = typeof(T).Name;
-
-    //     GameObject go = Managers.Resource.Instantiate($"UI/Scene/{name}", Root);
-
-    //     T ui = go.GetComponent<T>();
-    //     if (ui == null) ui = go.AddComponent<T>();
-    //     ui.Init();
-
-    //     return ui;
-    // }
-
-    public T ShowPopupUI<T>(string name = null) where T : Popup {
-        string path = typeof(T).Name;
-
-        // Managers.Input.EnableMove(false);
-        GameObject go = Managers.Resource.Instantiate($"UI/Popup/{path}", Root);
-
-        if (!string.IsNullOrEmpty(name))
-            go.name = name;
-
-        T popup = go.GetComponent<T>();
-        if (popup == null) popup = go.AddComponent<T>();
-        popup.Init();
-        _popupStack.Push(popup);
-
-        return popup;
-    }
-
-    public void ClosePopupUI(Popup popup) {
-        if (_popupStack.Count == 0)
-            return;
-
-        if (_popupStack.Peek() != popup) {
-            Debug.Log("Close Popup Failed!");
-            return;
-        }
-
-        ClosePopupUI();
-    }
-
-    public void ClosePopupUI() {
-        if (_popupStack.Count == 0)
-            return;
-
-        Popup popup = _popupStack.Pop();
-
-        Managers.Resource.Destroy(popup.gameObject);
-
-        if (_popupStack.Count == 0)
-            // Managers.Input.EnableMove(true);
-
-        _order--;
-    }
-
-    public void CloseAllPopupUI() {
-        while (_popupStack.Count > 0)
-            ClosePopupUI();
-    }
-
-    public void Update() {
-        // if (Managers.Input.CheckInput(Define.Input.Menu, true)) {
-        //     if (_popupStack.Count > 0) {
-        //         ClosePopupUI();
-        //         return;
-        //     }
-        //     // ToDo : ���� �߿� escŰ ������ �޴� ����
-        // }
-    }
-
-    public void Clear() {
-        CloseAllPopupUI();
     }
 }

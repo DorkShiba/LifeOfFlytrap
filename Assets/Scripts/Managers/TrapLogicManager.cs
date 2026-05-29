@@ -58,6 +58,6 @@ public class TrapLogicManager
 
     void OnTrapClosed(List<BugController> bugs)
     {
-        
+        Managers.Game.Title.updateEnergy(PlantController.Data.CurrentEnergy);
     }
 }

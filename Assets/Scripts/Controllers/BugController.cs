@@ -32,10 +32,7 @@ public abstract class BugController : MonoBehaviour
         transform.eulerAngles = new Vector3(0, 0, lookAngle);
     }
 
-    protected virtual void Move()
-    {
-        
-    }
+    protected abstract void Move();
 
     protected void InitializeHP(int hp)
     {
@@ -49,21 +46,12 @@ public abstract class BugController : MonoBehaviour
 
     public bool TakeDamage(int damage)
     {
-        if (isDying)
-        {
-            return false;
-        }
+        if (isDying) return false;
 
-        if (damage <= 0)
-        {
-            return false;
-        }
+        if (damage <= 0) return false;
 
         currentHP -= damage;
-        if (currentHP > 0)
-        {
-            return false;
-        }
+        if (currentHP > 0) return false;
 
         currentHP = 0;
         return true;

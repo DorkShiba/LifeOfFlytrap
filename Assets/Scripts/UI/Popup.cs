@@ -7,6 +7,6 @@ public class Popup : BaseUI {
     }
 
     public virtual void ClosePopupUI() {
-        Managers.UI.ClosePopupUI(this);
+
     }
 }

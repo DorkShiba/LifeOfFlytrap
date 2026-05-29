@@ -15,11 +15,13 @@ MonoBehaviour:
   speed: 7
   accelerationSmoothTime: 0.18
   energy: 5
+  digestionTime: 8
+  hp: 1
   baseStopTime: 1
   stopTimeRange: 0.4
   baseRushTime: 1
-  rushTimeRange: 0.8
-  readyRushTime: 0.1
-  decelMultiplier: 1
+  rushTimeRange: 1
+  readyRushTime: 1
+  decelMultiplier: 0.1
   rushDistanceBound: 2.5
   decelTime: 1

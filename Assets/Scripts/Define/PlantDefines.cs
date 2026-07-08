@@ -14,18 +14,44 @@ public class PlantDefines
         SturdyStem,
     }
 
-    public static Dictionary<UpgradeOptions, List<int>> UpgradeCosts = new Dictionary<UpgradeOptions, List<int>>()
+    private static UpgradeData _data;
+    public static UpgradeData Data
     {
-        { UpgradeOptions.AddLeaf, new List<int> { 10, 20, 30 } },
-        { UpgradeOptions.StrongBite, new List<int> { 15, 30, 45 } },
-        { UpgradeOptions.StrongScent, new List<int> { 20, 40, 60 } },
-        { UpgradeOptions.DeepRoot, new List<int> { 25, 50, 75 } },
-        { UpgradeOptions.SturdyStem, new List<int> { 30, 60, 90 } },
-    };
+        get
+        {
+            if (_data == null)
+            {
+                // Resources/EntityData/UpgradeData.asset 으로 저장한다고 가정
+                _data = Resources.Load<UpgradeData>("EntityData/UpgradeData");
+                if (_data == null)
+                {
+                    Debug.LogError("UpgradeData 에셋을 Resources/EntityData/ 폴더에서 찾을 수 없습니다!");
+                }
+            }
+            return _data;
+        }
+    }
 
-    public static List<float> ScentUpgradeByLevel = new List<float>() {
-        5.0f, 6.0f, 7.0f, 8.0f, 9.0f,
-    };
+    public static List<int> GetUpgradeCosts(UpgradeOptions option)
+    {
+        return Data != null ? Data.GetCosts(option) : new List<int>();
+    }
+
+    public static float GetCurrentLandingChance()
+    {
+        int level = PlantController.GetLevel(UpgradeOptions.StrongScent);
+        if (Data == null || Data.LandingChanceByLevel.Count == 0) return 30f;
+        level = Mathf.Clamp(level, 0, Data.LandingChanceByLevel.Count - 1);
+        return Data.LandingChanceByLevel[level];
+    }
+
+    public static float GetCurrentLandingRadius()
+    {
+        int level = PlantController.GetLevel(UpgradeOptions.StrongScent);
+        if (Data == null || Data.LandingRadiusByLevel.Count == 0) return 0.3f;
+        level = Mathf.Clamp(level, 0, Data.LandingRadiusByLevel.Count - 1);
+        return Data.LandingRadiusByLevel[level];
+    }
 
     public static List<Sprite> PlantSprites = new List<Sprite>()
     {

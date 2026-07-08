@@ -44,7 +44,7 @@ public class UpgradeButton : Popup
     public void RefreshUI()
     {
         int level = PlantController.GetLevel(option);
-        var costs = PlantDefines.UpgradeCosts[option];
+        var costs = PlantDefines.GetUpgradeCosts(option);
 
         if (level >= costs.Count)
         {

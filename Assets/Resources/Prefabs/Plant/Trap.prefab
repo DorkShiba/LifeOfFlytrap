@@ -81,8 +81,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1312113551
+  m_SortingLayer: 1
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -581049059476650384, guid: 0801d5dbd3088cd46b45b6859da9283f, type: 3}
@@ -151,17 +151,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.005645752, y: 0.05600965}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.48}
-    oldSize: {x: 1.96875, y: 1.8125}
+    oldSize: {x: 2.625, y: 2.4166667}
     newSize: {x: 1.96875, y: 1.8125}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.6525946, y: 1.4342427}
+  m_Size: {x: 1.9, y: 1.7}
   m_EdgeRadius: 0
 --- !u!114 &3505288261880784650
 MonoBehaviour:
@@ -177,10 +177,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrapController
   OnBiteBugs: []
   anim: {fileID: 8650385626663313677}
-  sensorZoneCollider: {fileID: 0}
+  biteZoneCollider: {fileID: 0}
   snapDuration: 0.5
   comboTimeout: 0.3
   trapClosedDuration: 5
+  landingRadius: 5
 --- !u!114 &451290891664481325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -194,4 +195,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrapZoneRelay
   trap: {fileID: 3505288261880784650}
-  zoneType: 1

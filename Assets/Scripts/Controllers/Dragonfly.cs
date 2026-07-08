@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 enum DragonflyState
@@ -20,8 +19,6 @@ public class DragonFly : BugController
 
     // 잠자리 고유 이동 상태 (BugController에 없으므로 여기서 선언)
     private Vector2 velocity = Vector2.zero;
-    private bool isExiting = false;
-    private Vector2 exitDirection = Vector2.zero;
 
     void Awake()
     {
@@ -41,9 +38,9 @@ public class DragonFly : BugController
     // ─────────────────────────────────────────────
     public override float EnergyValue => data != null ? data.EnergyValue : 0f;
     protected override float MoveSpeed => data != null ? data.MoveSpeed : 3f;
-    protected override float JitterDegPerSecond => data != null ? data.JitterDegPerSecond : 0f;
+    protected override float JitterDegPerSecond => 0f;   // DragonFly는 배회 FSM 미사용
     protected override float BaseApproachChancePercent => data != null ? data.BaseApproachChancePercent : 0f;
-    protected override float LandDurationSeconds => data != null ? data.LandDurationSeconds : 0f;
+    protected override float LandDurationSeconds => 0f;   // DragonFly는 착지 FSM 미사용
 
     // ─────────────────────────────────────────────
     // 잠자리 고유 Update (BugController FSM 미사용)
@@ -68,7 +65,7 @@ public class DragonFly : BugController
         }
         else if (state == DragonflyState.Ready)
         {
-            transform.position -= (Vector3)(direction * data.Speed *
+            transform.position -= (Vector3)(direction * data.MoveSpeed *
                 data.DecelMultiplier * Time.deltaTime);
             if (timer <= Util.EPS) EnterRush();
         }
@@ -87,10 +84,6 @@ public class DragonFly : BugController
 
     Vector2 SelectDirection()
     {
-        // 탈출 중이라면 exitDirection으로 고정해 맵 밖을 향하게 한다
-        if (isExiting)
-            return exitDirection;
-
         // 경계 근처면 안쪽을 향하는 방향만 허용
         Vector2 pos = transform.position;
         float halfW = Util.MapWidth * 0.5f;
@@ -100,37 +93,12 @@ public class DragonFly : BugController
         for (int i = 0; i < 10; i++)
         {
             Vector2 dir = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
-            Vector2 projected = pos + dir * data.Speed * data.BaseRushTime;
+            Vector2 projected = pos + dir * data.MoveSpeed * data.BaseRushTime;
             if (Mathf.Abs(projected.x) < halfW - margin && Mathf.Abs(projected.y) < halfH - margin)
                 return dir;
         }
         // 10번 시도 실패 시 맵 중심 방향으로
         return ((Vector2)(Vector3.zero - transform.position)).normalized;
-    }
-
-    /// <summary>잠자리가 맵 밖으로 탈출을 시작한다.</summary>
-    private void StartExit()
-    {
-        isExiting = true;
-        // 맵 중심에서 바깥쪽 방향으로 탈출
-        exitDirection = ((Vector2)(transform.position - Vector3.zero)).normalized;
-        if (exitDirection == Vector2.zero)
-            exitDirection = Vector2.right;
-
-        direction = exitDirection;
-        velocity = exitDirection * (data != null ? data.Speed * data.ExitSpeedMultiplier : 3f);
-        LookAt(transform.position + (Vector3)exitDirection);
-        state = DragonflyState.Rush;
-        float rushTime = data.BaseRushTime + Random.Range(-data.RushTimeRange, data.RushTimeRange);
-        timer = rushTime;
-    }
-
-    /// <summary>오브젝트를 바라볼 방향으로 회전한다.</summary>
-    private void LookAt(Vector3 target)
-    {
-        Vector2 dir = ((Vector2)(target - transform.position)).normalized;
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
     void EnterIdle()
@@ -144,7 +112,7 @@ public class DragonFly : BugController
     {
         state = DragonflyState.Rotate;
         direction = SelectDirection();
-        velocity = direction * (isExiting ? (data.Speed * data.ExitSpeedMultiplier) : data.Speed);
+        velocity = direction * data.MoveSpeed;
         LookAt(transform.position + (Vector3)direction);
         timer = 0.5f;
     }

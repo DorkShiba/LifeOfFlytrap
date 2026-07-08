@@ -10,8 +10,8 @@ public class Util
         return Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg;
     }
 
-    public const float MapWidth = 6.8f * 2;  // 맵의 가로 크기
-    public const float MapHeight = 4.5f * 2; // 맵의 세로
+    public const float MapWidth = 11.25f * 2;  // 맵의 가로 크기
+    public const float MapHeight = 7.5f * 2; // 맵의 세로
 
     public static float BoxMuller(float m, float s, float min, float max)
     {

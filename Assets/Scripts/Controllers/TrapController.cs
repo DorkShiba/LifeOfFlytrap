@@ -36,7 +36,15 @@ public class TrapController : MonoBehaviour, ITrap
     private BugController occupant = null;
 
     public Vector3 Position => transform.position;
-    public float LandingRadius => landingRadius;
+    public Vector2 ColliderSize
+    {
+        get
+        {
+            var col = GetComponent<BoxCollider2D>();
+            return col != null ? col.size : new Vector2(3.8f, 3.4f);
+        }
+    }
+    public float LandingRadius => PlantDefines.GetCurrentLandingRadius();
     public bool IsAvailable => closeTime <= Util.EPS && occupant == null;
 
     public void Occupy(BugController bug)
@@ -67,14 +75,12 @@ public class TrapController : MonoBehaviour, ITrap
 
     void OnEnable()
     {
-        BugController.RegisterTrap(this);
         Managers.Input.OnClickPerformed -= Bite;
         Managers.Input.OnClickPerformed += Bite;
     }
 
     void OnDisable()
     {
-        BugController.UnregisterTrap(this);
         CancelSnap();
         if (Managers.Input == null) return;
         Managers.Input.OnClickPerformed -= Bite;

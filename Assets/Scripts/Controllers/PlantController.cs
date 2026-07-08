@@ -16,9 +16,12 @@ public class PlantController : MonoBehaviour
     void Start()
     {
         _instance = this;
-        data = Managers.Resource.Load<PlantData>("EntityData/PlantData");
+        
+        // 1. 에셋 원본이 오염되지 않도록 원본을 불러와서 복제(Clone)하여 런타임용으로 사용합니다.
+        PlantData originalData = Managers.Resource.Load<PlantData>("EntityData/PlantData");
+        data = Instantiate(originalData);
 
-        // 업그레이드 단계 초기화
+        // 업그레이드 단계 초기화 (기본값)
         upgradeLevels = new Dictionary<PlantDefines.UpgradeOptions, int>
         {
             { PlantDefines.UpgradeOptions.AddLeaf,    0 },
@@ -28,19 +31,16 @@ public class PlantController : MonoBehaviour
             { PlantDefines.UpgradeOptions.SturdyStem,  0 },
         };
 
-        // 세이브 데이터 복원
+        // 2. 세이브 데이터 로드 시도
         SaveData saved = Managers.Data.Load();
         if (saved != null)
         {
-            // PlantData 스탯 복원
+            // 세이브가 있으면 세이브 데이터로 덮어씌움
             data.CurrentEnergy = saved.currentEnergy;
             data.BiteDamage = saved.biteDamage;
-            data.AttractionRange = saved.attractionRange;
-            data.AttractionStrength = saved.attractionStrength;
             data.EnergyRegenRate = saved.energyRegenRate;
             data.EnergyCostPerBite = saved.energyCostPerBite;
 
-            // 업그레이드 단계 복원
             upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf] = saved.addLeafLevel;
             upgradeLevels[PlantDefines.UpgradeOptions.StrongBite] = saved.strongBiteLevel;
             upgradeLevels[PlantDefines.UpgradeOptions.StrongScent] = saved.strongScentLevel;
@@ -54,8 +54,14 @@ public class PlantController : MonoBehaviour
         }
         else
         {
-            // 신규 게임: 트랩 1개로 시작
-            CreateTraps();
+            // 세이브가 없으면 위에서 복제해둔 원본(ScriptableObject)의 수치를 그대로 사용
+            CreateTraps(); // 신규 게임: 트랩 1개
+        }
+
+        // 초기화 및 세이브 복원이 끝난 직후, 로드된 에너지 값을 UI에 반영합니다.
+        if (Managers.Game.Title != null)
+        {
+            Managers.Game.Title.updateEnergy(data.CurrentEnergy);
         }
 
         Managers.Game.OnMonthChanged -= HandleMonthChange;
@@ -79,7 +85,7 @@ public class PlantController : MonoBehaviour
     public bool TryUpgrade(PlantDefines.UpgradeOptions option)
     {
         int currentLevel = upgradeLevels[option];
-        var costs = PlantDefines.UpgradeCosts[option];
+        var costs = PlantDefines.GetUpgradeCosts(option);
 
         if (currentLevel >= costs.Count)
         {
@@ -114,7 +120,7 @@ public class PlantController : MonoBehaviour
     public static bool IsMaxLevel(PlantDefines.UpgradeOptions option)
     {
         int level = GetLevel(option);
-        return level >= PlantDefines.UpgradeCosts[option].Count;
+        return level >= PlantDefines.GetUpgradeCosts(option).Count;
     }
 
     // ─────────────────────────────────────────────
@@ -132,8 +138,7 @@ public class PlantController : MonoBehaviour
                 data.BiteDamage += 1;
                 break;
             case PlantDefines.UpgradeOptions.StrongScent:
-                data.AttractionRange += 1.0f;
-                data.AttractionStrength += 2.0f;
+                // 향기(StrongScent) 업그레이드는 이제 PlantDefines.GetCurrentLandingChance() / Radius()를 통해 동적으로 레벨을 참조하므로 별도의 상태값 갱신이 불필요함
                 break;
             case PlantDefines.UpgradeOptions.DeepRoot:
                 data.EnergyRegenRate += 1;
@@ -146,26 +151,23 @@ public class PlantController : MonoBehaviour
 
     public void CreateTraps()
     {
-        Vector3 trapPosition;
-        switch (traps.Count)
+        Vector3 trapPosition = Vector3.zero;
+        if (PlantDefines.Data != null && traps.Count < PlantDefines.Data.TrapPositions.Count)
         {
-            case 0: trapPosition = new Vector3(-1.28f, 1.58f, 0); break;
-            case 1: trapPosition = new Vector3(2.9f, -1.25f, 0); break;
-            case 2: trapPosition = new Vector3(-1.65f, -2.6f, 0); break;
-            case 3: trapPosition = new Vector3(-3.8f, 0.23f, 0); break;
-            case 4: trapPosition = new Vector3(1.95f, 1.6f, 0); break;
-            case 5: trapPosition = new Vector3(-0.26f, -4.00f, 0); break;
-            case 6: trapPosition = new Vector3(-5.2f, -3.5f, 0); break;
-            default: return;
+            trapPosition = PlantDefines.Data.TrapPositions[traps.Count];
+        }
+        else
+        {
+            Debug.LogWarning("트랩 위치 데이터가 더 이상 없거나 UpgradeData를 로드하지 못했습니다.");
+            return;
         }
 
-        GameObject trap = Managers.Resource.Instantiate("Trap", transform, trapPosition);
+        GameObject trap = Managers.Resource.Instantiate("Plant/Trap", transform, trapPosition);
         if (spriteRenderer != null && PlantDefines.PlantSprites.Count > traps.Count)
             spriteRenderer.sprite = PlantDefines.PlantSprites[traps.Count];
 
         TrapController tc = trap.GetComponent<TrapController>();
         if (tc != null) traps.Add(tc);
-        // TrapController.OnEnable에서 BugController.RegisterTrap이 호출되고,
         // Awake에서 Managers.TrapLogic.AddTrap이 호출되므로 여기서 중복 등록하지 않는다.
     }
 

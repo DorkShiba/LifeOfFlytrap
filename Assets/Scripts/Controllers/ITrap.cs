@@ -4,6 +4,7 @@ using UnityEngine;
 public interface ITrap
 {
     Vector3 Position { get; }
+    Vector2 ColliderSize { get; }
     float LandingRadius { get; }
     bool IsAvailable { get; }
     void Occupy(BugController bug);

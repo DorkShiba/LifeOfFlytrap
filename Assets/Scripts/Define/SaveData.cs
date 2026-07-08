@@ -10,8 +10,7 @@ public class SaveData
     // PlantData 상태
     public int currentEnergy;
     public int biteDamage;
-    public float attractionRange;
-    public float attractionStrength;
+
     public int energyRegenRate;
     public int energyCostPerBite;
 

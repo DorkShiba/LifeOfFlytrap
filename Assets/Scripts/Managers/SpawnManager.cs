@@ -145,7 +145,14 @@ public class SpawnManager
         // 맵 가장자리 랜덤 위치 선택
         Vector2 spawnPos = GetSpawnPosition();
 
-        Managers.Resource.Instantiate(selected.PrefabName, null, spawnPos);
+        GameObject go = Managers.Resource.Instantiate(selected.PrefabName, null, spawnPos);
+        BugController bc = go.GetComponent<BugController>();
+        if (bc != null)
+        {
+            float halfW = Util.MapWidth * 0.5f;
+            float halfH = Util.MapHeight * 0.5f;
+            bc.Init(new Vector2(-halfW, -halfH), new Vector2(halfW, halfH));
+        }
     }
 
     /// <summary>

@@ -20,8 +20,7 @@ public class DataManager
         {
             data.currentEnergy      = plant.CurrentEnergy;
             data.biteDamage         = plant.BiteDamage;
-            data.attractionRange    = plant.AttractionRange;
-            data.attractionStrength = plant.AttractionStrength;
+            // (향기 수치는 PlantData에서 삭제됨)
             data.energyRegenRate    = plant.EnergyRegenRate;
             data.energyCostPerBite  = plant.EnergyCostPerBite;
         }

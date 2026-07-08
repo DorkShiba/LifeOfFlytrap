@@ -12,22 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 013093688a5410d42b82a7b5427c08a3, type: 3}
   m_Name: FlyData
   m_EditorClassIdentifier: Assembly-CSharp::FlyData
-  speed: 5
-  accelerationSmoothTime: 0.18
-  energy: 5
-  digestionTime: 8
   hp: 1
+  moveSpeed: 2.5
+  baseApproachChancePercent: 90
+  energyValue: 5
   firstAppearMonth: 3
   spawnWeight: 100
   prefabName: Bug/Fly
-  lifetimeDuration: 30
-  exitSpeedMultiplier: 1.5
-  wanderRadius: 1
-  wanderDistance: 1.5
-  wanderJitter: 0.15
-  wanderWeight: 0.7
-  attractionWeight: 0.3
-  arrivalRange: 10
-  minSpeed: 0.2
-  capturedStayTime: 3
-  captureDecisionChance: 0.3
+  jitterDegPerSecond: 25
+  landDurationSeconds: 2

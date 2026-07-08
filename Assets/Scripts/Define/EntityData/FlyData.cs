@@ -3,27 +3,24 @@ using System;
 
 /// <summary>
 /// 파리(Fly) 전용 ScriptableObject 데이터.
-/// 공통 AI 스탯(MoveSpeed, JitterDegPerSecond, BaseApproachChancePercent,
-/// LandDurationSeconds, EnergyValue)은 부모 BugData에서 설정한다.
+/// 공통 AI 스탯(MoveSpeed, BaseApproachChancePercent, EnergyValue)은 부모 BugData에서 설정한다.
+/// Fly 전용 스탯(JitterDegPerSecond, LandDurationSeconds)는 여기서 설정한다.
 /// </summary>
 [Serializable]
 [CreateAssetMenu(fileName = "New Fly Data", menuName = "EntityData/FlyData", order = 1)]
 public class FlyData : BugData
 {
-    // ── 아래 필드들은 구 스텔스 AI 코드의 잔재입니다 ──
-    // 현재 BugController(FSM 기반)는 이 값들을 사용하지 않습니다.
-    // 새 로직이 필요하면 재활성화하거나 삭제하세요.
+    [Header("Fly 전용 AI 스탯")]
+    [Tooltip("배회 시 방향 흘델림 속도(도/초) (BugController.JitterDegPerSecond)")]
+    [SerializeField] private float jitterDegPerSecond = 25f;
 
-    // [Header("구 스텔스 AI 파라미터 (미사용)")]
+    [Tooltip("트랩에 착지 후 머무는 시간(초) (BugController.LandDurationSeconds)")]
+    [SerializeField] private float landDurationSeconds = 2f;
+
+    public float JitterDegPerSecond => jitterDegPerSecond;
+    public float LandDurationSeconds => landDurationSeconds;
+
+    // 구 스텔스 AI 파라미터 (미사용 주석 보존)
     // [SerializeField] private float wanderRadius = 1f;
-    // [SerializeField] private float wanderDistance = 1.5f;
-    // [SerializeField] private float wanderJitter = 0.15f;
-    // [SerializeField] private float wanderWeight = 0.7f;
-    // [SerializeField] private float attractionWeight = 0.3f;
-    // [SerializeField] private float arrivalRange = 2.0f;
-    // [SerializeField] private float minSpeed = 0.2f;
-    // [SerializeField] private float capturedStayTime = 3.0f;
-    // [SerializeField] private float captureDecisionChance = 0.3f;
-
-    // 파리 전용 추가 스탯이 필요하면 여기에 추가하세요.
+    // ...
 }

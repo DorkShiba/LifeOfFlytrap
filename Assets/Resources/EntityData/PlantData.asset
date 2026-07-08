@@ -12,9 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ba287419ce23ce4c86c010d7dac311c, type: 3}
   m_Name: PlantData
   m_EditorClassIdentifier: Assembly-CSharp::PlantData
-  attractionRange: 2
-  attractionStrength: 5
   biteDamage: 1
-  currentEnergy: 106
+  currentEnergy: 500
   energyRegenRate: 0
   energyCostPerBite: 3

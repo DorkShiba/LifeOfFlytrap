@@ -8,28 +8,8 @@ using UnityEngine;
 /// </summary>
 public abstract class BugController : MonoBehaviour
 {
-    protected enum BugState { Wander, Approach, Landed }
-
-    // 씬에 존재하는 트랩들을 등록해두는 정적 레지스트리.
-    // 실제 Trap 스크립트의 OnEnable/OnDisable에서 RegisterTrap/UnregisterTrap을 호출해주세요.
-    private static readonly List<ITrap> traps = new List<ITrap>();
-    private static ITrapAttractionProvider attractionProvider;
-
-    public static void RegisterTrap(ITrap trap)
-    {
-        if (!traps.Contains(trap)) traps.Add(trap);
-    }
-
-    public static void UnregisterTrap(ITrap trap)
-    {
-        traps.Remove(trap);
-    }
-
-    // 업그레이드 시스템(에너지로 트랩 유인 배율 강화)을 이 provider로 연결하세요.
-    public static void SetAttractionProvider(ITrapAttractionProvider provider)
-    {
-        attractionProvider = provider;
-    }
+    public enum BugState { Wander, Approach, Landed }
+    // (이전 ITrapAttractionProvider 참조 코드 삭제됨)
 
     [Header("맵 범위 (스포너가 Init으로 세팅)")]
     protected Vector2 mapMin;
@@ -39,11 +19,12 @@ public abstract class BugController : MonoBehaviour
     [SerializeField] protected float boundaryPadding = 1.5f;
     [SerializeField] protected float approachCheckInterval = 2f;
 
-    protected BugState currentState;
+    public BugState currentState;
     protected float currentAngleRad;
     protected float checkTimer;
     protected float landTimer;
     protected ITrap targetTrap;
+    protected Vector2 targetLandingPoint;
 
     // 종별로 반드시 정의해야 하는 스탯들
     protected abstract float MoveSpeed { get; }
@@ -54,8 +35,7 @@ public abstract class BugController : MonoBehaviour
     /// <summary>잡혔을 때 식물에 주는 에너지량. 하위 클래스에서 Data로부터 읽어온다.</summary>
     public abstract float EnergyValue { get; }
 
-    protected virtual float TrapAttractionMultiplier =>
-        attractionProvider != null ? attractionProvider.GetMultiplier() : 1f;
+    // (이전 TrapAttractionMultiplier 삭제됨)
 
     // HP 및 Freeze 상태
     private int hp = 1;
@@ -88,18 +68,29 @@ public abstract class BugController : MonoBehaviour
         // 기존 방향을 유지한 채 각도만 조금씩 흔들어준다 (지터).
         currentAngleRad += Random.Range(-1f, 1f) * JitterDegPerSecond * Mathf.Deg2Rad * dt * 6f;
 
-        // 경계 패딩 구역에 들어오면 안쪽 방향으로 부드럽게 조향.
+        // 경계 패딩 구역에 들어오면 맵 바깥을 향하는지 내적(Dot)으로 검사 후 중심 방향 척력 적용
         Vector2 pos = transform.position;
-        float? towardDeg = null;
-        if (pos.x < mapMin.x + boundaryPadding) towardDeg = 0f;
-        else if (pos.x > mapMax.x - boundaryPadding) towardDeg = 180f;
-        else if (pos.y < mapMin.y + boundaryPadding) towardDeg = 90f;
-        else if (pos.y > mapMax.y - boundaryPadding) towardDeg = -90f;
+        Vector2 outwardNormal = Vector2.zero;
 
-        if (towardDeg.HasValue)
+        if (pos.x < mapMin.x + boundaryPadding) outwardNormal = Vector2.left;
+        else if (pos.x > mapMax.x - boundaryPadding) outwardNormal = Vector2.right;
+        else if (pos.y < mapMin.y + boundaryPadding) outwardNormal = Vector2.down;
+        else if (pos.y > mapMax.y - boundaryPadding) outwardNormal = Vector2.up;
+
+        if (outwardNormal != Vector2.zero)
         {
-            float diffDeg = Mathf.DeltaAngle(currentAngleRad * Mathf.Rad2Deg, towardDeg.Value);
-            currentAngleRad += diffDeg * Mathf.Deg2Rad * 2.5f * dt;
+            Vector2 currentDir = new Vector2(Mathf.Cos(currentAngleRad), Mathf.Sin(currentAngleRad));
+
+            // 내적이 0보다 크면(예각) 벌레가 맵 바깥을 향하고 있다는 뜻
+            if (Vector2.Dot(currentDir, outwardNormal) > 0f)
+            {
+                Vector2 center = (mapMin + mapMax) * 0.5f;
+                Vector2 toCenter = (center - pos).normalized;
+
+                // 중심을 향하는 벡터를 강하게 섞어주어 U턴을 유도 (반발력)
+                currentDir = Vector2.Lerp(currentDir, toCenter, 5f * dt).normalized;
+                currentAngleRad = Mathf.Atan2(currentDir.y, currentDir.x);
+            }
         }
 
         Move(MoveSpeed, dt);
@@ -109,13 +100,20 @@ public abstract class BugController : MonoBehaviour
         if (checkTimer <= 0f)
         {
             checkTimer = approachCheckInterval;
-            float chance = Mathf.Min(90f, BaseApproachChancePercent * TrapAttractionMultiplier);
+            // 개별 벌레 종의 기본 확률 무시하고 전역 업그레이드 확률 사용
+            float chance = PlantDefines.GetCurrentLandingChance();
             if (Random.Range(0f, 100f) < chance)
             {
                 ITrap trap = SelectTrap();
                 if (trap != null)
                 {
                     targetTrap = trap;
+                    // targetTrap의 ColliderSize 참조
+                    Vector2 colliderSize = targetTrap.ColliderSize;
+                    float offsetX = Random.Range(-colliderSize.x * 0.5f, colliderSize.x * 0.5f);
+                    float offsetY = Random.Range(-colliderSize.y * 0.5f, colliderSize.y * 0.5f);
+                    targetLandingPoint = (Vector2)targetTrap.Position + new Vector2(offsetX, offsetY);
+
                     ChangeState(BugState.Approach);
                 }
             }
@@ -132,7 +130,8 @@ public abstract class BugController : MonoBehaviour
         }
 
         Vector2 pos = transform.position;
-        Vector2 toTrap = (Vector2)targetTrap.Position - pos;
+        // 트랩의 정중앙이 아닌 랜덤으로 결정된 목표 지점을 향해 이동
+        Vector2 toTrap = targetLandingPoint - pos;
         float dist = toTrap.magnitude;
 
         // 목적지 방향으로 각도를 서서히 회전 (급격한 방향 전환 방지).
@@ -148,7 +147,6 @@ public abstract class BugController : MonoBehaviour
 
         if (dist <= targetTrap.LandingRadius)
         {
-            transform.position = targetTrap.Position;
             targetTrap.Occupy(this);
             landTimer = LandDurationSeconds;
             ChangeState(BugState.Landed);
@@ -171,6 +169,15 @@ public abstract class BugController : MonoBehaviour
     {
         Vector3 delta = new Vector3(Mathf.Cos(currentAngleRad), Mathf.Sin(currentAngleRad), 0f) * speed * dt;
         transform.position += delta;
+        transform.rotation = Quaternion.Euler(0f, 0f, currentAngleRad * Mathf.Rad2Deg - 90f);
+    }
+
+    /// <summary>오브젝트를 바라볼 방향으로 회전한다.</summary>
+    protected void LookAt(Vector3 target)
+    {
+        Vector2 dir = ((Vector2)(target - transform.position)).normalized;
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
     }
 
     protected virtual void ChangeState(BugState newState)
@@ -191,10 +198,11 @@ public abstract class BugController : MonoBehaviour
         ITrap nearest = null;
         float best = float.MaxValue;
         Vector2 pos = transform.position;
-        for (int i = 0; i < traps.Count; i++)
+        var globalTraps = Managers.TrapLogic.traps;
+        for (int i = 0; i < globalTraps.Count; i++)
         {
-            ITrap t = traps[i];
-            if (!t.IsAvailable) continue;
+            ITrap t = globalTraps[i].GetComponent<ITrap>();
+            if (t == null || !t.IsAvailable) continue;
             float d = ((Vector2)t.Position - pos).sqrMagnitude;
             if (d < best) { best = d; nearest = t; }
         }

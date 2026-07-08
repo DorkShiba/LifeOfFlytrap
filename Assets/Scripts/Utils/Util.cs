@@ -5,7 +5,8 @@ using UnityEngine;
 public class Util
 {
     public const float EPS = 1e-5f;
-    public static float AngleBetweenTwoPoints(Vector3 a, Vector3 b) {
+    public static float AngleBetweenTwoPoints(Vector3 a, Vector3 b)
+    {
         return Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg;
     }
 
@@ -32,7 +33,7 @@ public class Util
         if (go == null)
             return null;
 
-        Transform[] transforms = recursive 
+        Transform[] transforms = recursive
             ? go.GetComponentsInChildren<Transform>(true)
             : go.GetComponentsInChildren<Transform>(false);
 
@@ -49,5 +50,10 @@ public class Util
         return null;
     }
 
-
+    public static List<int> ClearConstraints = new List<int>{
+        1000, 1000, 1000,
+        1000, 1000, 1000,
+        1000, 1000, 1000,
+        1000, 1000, 1000
+    };
 }

@@ -12,11 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d973519d4c1bba74f97aae012644af19, type: 3}
   m_Name: DragonflyData
   m_EditorClassIdentifier: Assembly-CSharp::DragonflyData
-  speed: 7
+  speed: 10
   accelerationSmoothTime: 0.18
-  energy: 5
-  digestionTime: 8
+  energy: 7
+  digestionTime: 10
   hp: 1
+  firstAppearMonth: 4
+  spawnWeight: 70
+  prefabName: Bug/Dragonfly
+  lifetimeDuration: 30
+  exitSpeedMultiplier: 1.5
   baseStopTime: 1
   stopTimeRange: 0.4
   baseRushTime: 1

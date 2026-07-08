@@ -1,23 +1,65 @@
-// using UnityEngine;
-// using System.Collections.Generic;
+using UnityEngine;
+using System.IO;
 
-// public class DataManager {
-//     private static Dictionary<string, object> _prefabs = new Dictionary<string, object>();
+public class DataManager
+{
+    private static string SavePath =>
+        Path.Combine(Application.persistentDataPath, "save.json");
 
-//     public static Dictionary<string, object> Prefabs => _prefabs;
+    public void Save()
+    {
+        SaveData data = new SaveData();
 
-//     public void 
+        // GameManager 상태 수집
+        data.currentMonth = Managers.Game.CurrentMonth;
+        data.monthTimer   = Managers.Game.MonthTimer;
 
-//     public void Destroy(GameObject go) {
-//         if (go == null)
-//             return;
+        // PlantData 상태 수집
+        PlantData plant = PlantController.Data;
+        if (plant != null)
+        {
+            data.currentEnergy      = plant.CurrentEnergy;
+            data.biteDamage         = plant.BiteDamage;
+            data.attractionRange    = plant.AttractionRange;
+            data.attractionStrength = plant.AttractionStrength;
+            data.energyRegenRate    = plant.EnergyRegenRate;
+            data.energyCostPerBite  = plant.EnergyCostPerBite;
+        }
 
-//         Poolable poolable = go.GetComponent<Poolable>();
-//         if (poolable != null) {
-//             Managers.Pool.Push(poolable);
-//             return;
-//         }
+        // 업그레이드 단계 수집
+        data.addLeafLevel    = PlantController.GetLevel(PlantDefines.UpgradeOptions.AddLeaf);
+        data.strongBiteLevel  = PlantController.GetLevel(PlantDefines.UpgradeOptions.StrongBite);
+        data.strongScentLevel = PlantController.GetLevel(PlantDefines.UpgradeOptions.StrongScent);
+        data.deepRootLevel    = PlantController.GetLevel(PlantDefines.UpgradeOptions.DeepRoot);
+        data.sturdyStemLevel  = PlantController.GetLevel(PlantDefines.UpgradeOptions.SturdyStem);
 
-//         Object.Destroy(go);
-//     }
-// }
+        string json = JsonUtility.ToJson(data, prettyPrint: true);
+        File.WriteAllText(SavePath, json);
+        Debug.Log($"[DataManager] 저장 완료 → {SavePath}");
+    }
+
+    public SaveData Load()
+    {
+        if (!File.Exists(SavePath))
+        {
+            Debug.Log("[DataManager] 세이브 파일 없음. 새 게임으로 시작.");
+            return null;
+        }
+
+        string json = File.ReadAllText(SavePath);
+        SaveData data = JsonUtility.FromJson<SaveData>(json);
+        Debug.Log($"[DataManager] 로드 완료 → Month {data.currentMonth}");
+        return data;
+    }
+
+    public bool HasSaveFile() => File.Exists(SavePath);
+
+    public void DeleteSave()
+    {
+        if (File.Exists(SavePath))
+        {
+            File.Delete(SavePath);
+            Debug.Log("[DataManager] 세이브 파일 삭제 완료.");
+        }
+    }
+}

@@ -1,7 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class PlantDefines
 {
@@ -21,6 +21,10 @@ public class PlantDefines
         { UpgradeOptions.StrongScent, new List<int> { 20, 40, 60 } },
         { UpgradeOptions.DeepRoot, new List<int> { 25, 50, 75 } },
         { UpgradeOptions.SturdyStem, new List<int> { 30, 60, 90 } },
+    };
+
+    public static List<float> ScentUpgradeByLevel = new List<float>() {
+        5.0f, 6.0f, 7.0f, 8.0f, 9.0f,
     };
 
     public static List<Sprite> PlantSprites = new List<Sprite>()

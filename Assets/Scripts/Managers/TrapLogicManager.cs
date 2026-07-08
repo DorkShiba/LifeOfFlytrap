@@ -14,6 +14,15 @@ public class TrapLogicManager
 
     }
 
+    /// <summary>
+    /// Destroy된 벌레 오브젝트를 bugs 리스트에서 제거한다.
+    /// SpawnManager가 현재 살아있는 벌레 수를 정확히 파악하기 위해 호출한다.
+    /// </summary>
+    public void CleanupBugs()
+    {
+        bugs.RemoveAll(b => b == null);
+    }
+
     public void AddBug(GameObject bug)
     {
         if (bug == null || bugs.Contains(bug)) {
@@ -30,15 +39,18 @@ public class TrapLogicManager
         }
 
         traps.Add(trap);
-        trap.GetComponent<TrapController>().onBugSensed -= OnBugEnterSensor;
-        trap.GetComponent<TrapController>().onBugEscaped -= OnBugExitSensor;
-        trap.GetComponent<TrapController>().onBugEaten -= OnBugEaten;
-        trap.GetComponent<TrapController>().onTrapClosed -= OnTrapClosed;
+        TrapController tc = trap.GetComponent<TrapController>();
+        if (tc == null) return;
 
-        trap.GetComponent<TrapController>().onBugSensed += OnBugEnterSensor;
-        trap.GetComponent<TrapController>().onBugEscaped += OnBugExitSensor;
-        trap.GetComponent<TrapController>().onBugEaten += OnBugEaten;
-        trap.GetComponent<TrapController>().onTrapClosed += OnTrapClosed;
+        tc.onBugSensed -= OnBugEnterSensor;
+        tc.onBugEscaped -= OnBugExitSensor;
+        tc.onBugEaten -= OnBugEaten;
+        tc.onTrapClosed -= OnTrapClosed;
+
+        tc.onBugSensed += OnBugEnterSensor;
+        tc.onBugEscaped += OnBugExitSensor;
+        tc.onBugEaten += OnBugEaten;
+        tc.onTrapClosed += OnTrapClosed;
     }
 
     void OnBugEnterSensor(BugController bug)
@@ -53,6 +65,24 @@ public class TrapLogicManager
 
     void OnBugEaten(BugController bug)
     {
+        // 벌레의 에너지를 식물에 흡수
+        PlantData data = PlantController.Data;
+        if (data != null)
+        {
+            data.CurrentEnergy += Mathf.RoundToInt(bug.EnergyValue);
+            Managers.Game.Title.updateEnergy(data.CurrentEnergy);
+
+            // 클리어 조건 달성 시 화면 프리즈 및 EndMonth 팝업 표시
+            int currentMonth = Managers.Game.CurrentMonth;
+            int monthIndex = currentMonth - 1;
+            if (monthIndex >= 0 && monthIndex < Util.ClearConstraints.Count
+                && data.CurrentEnergy >= Util.ClearConstraints[monthIndex]
+                && !Managers.Game.IsFrozen)
+            {
+                Managers.Game.FreezeForEndMonth();
+            }
+        }
+
         bug.Die();
     }
 

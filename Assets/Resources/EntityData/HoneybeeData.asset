@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 013093688a5410d42b82a7b5427c08a3, type: 3}
-  m_Name: FlyData
+  m_Name: HoneybeeData
   m_EditorClassIdentifier: Assembly-CSharp::FlyData
-  speed: 5
+  speed: 4
   accelerationSmoothTime: 0.18
-  energy: 5
+  energy: 6
   digestionTime: 8
   hp: 1
-  firstAppearMonth: 3
-  spawnWeight: 100
-  prefabName: Bug/Fly
+  firstAppearMonth: 4
+  spawnWeight: 50
+  prefabName: Bug/Honeybee
   lifetimeDuration: 30
   exitSpeedMultiplier: 1.5
   wanderRadius: 1
@@ -27,7 +27,7 @@ MonoBehaviour:
   wanderJitter: 0.15
   wanderWeight: 0.7
   attractionWeight: 0.3
-  arrivalRange: 10
+  arrivalRange: 2
   minSpeed: 0.2
   capturedStayTime: 3
   captureDecisionChance: 0.3

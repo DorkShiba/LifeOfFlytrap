@@ -1,25 +1,59 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
-public class TrapController : MonoBehaviour
+public class TrapController : MonoBehaviour, ITrap
 {
     [Header("Events")]
-    [SerializeField] public Action<BugController> onBugSensed;
-    [SerializeField] public Action<BugController> onBugEscaped;
-    [SerializeField] public Action<BugController> onBugEaten;
-    [SerializeField] public Action<List<BugController>> onTrapClosed;
+    public Action<BugController> onBugSensed;
+    public Action<BugController> onBugEscaped;
+    public Action<BugController> onBugEaten;
+    public Action<List<BugController>> onTrapClosed;
 
+    // Bite Zone에 현재 들어와 있는 벌레 목록
     [SerializeField] private List<BugController> OnBiteBugs = new List<BugController>();
-    [SerializeField] private List<BugController> Preys = new List<BugController>();
-    
+
     [SerializeField] private Animator anim;
-    [SerializeField] private Collider2D sensorZoneCollider;
-    [SerializeField] private float biteComboTimeout = 1.0f;
+    [SerializeField] private Collider2D biteZoneCollider;
+
+    // 스냅 윈도우 최대 지속 시간 (하드 리밋)
+    [SerializeField] private float snapDuration = 0.5f;
+    // 연타 종료 판정: 마지막 클릭 후 이 시간 동안 입력 없으면 스냅 종료
+    [SerializeField] private float comboTimeout = 0.3f;
+    // 트랩 닫힘 회복 시간
+    [SerializeField] private float trapClosedDuration = 5.0f;
+
+    // ─────────────────────────────────────────────
+    // ITrap 구현
+    // ─────────────────────────────────────────────
+
+    [Header("ITrap 설정")]
+    [Tooltip("벨레가 착지하는 반지름(유닛)")]
+    [SerializeField] private float landingRadius = 0.3f;
+
+    // 현재 이 트랩을 점유 중인 벨레 (다존 점유가 필요하면 List로 변경)
+    private BugController occupant = null;
+
+    public Vector3 Position => transform.position;
+    public float LandingRadius => landingRadius;
+    public bool IsAvailable => closeTime <= Util.EPS && occupant == null;
+
+    public void Occupy(BugController bug)
+    {
+        occupant = bug;
+    }
+
+    public void Vacate(BugController bug)
+    {
+        if (occupant == bug) occupant = null;
+    }
 
     private float closeTime = 0.0f;
-    private Coroutine biteComboTimerCoroutine;
+    private bool isSnapping = false;
+    // 두 코루틴 중 먼저 발화하는 쪽이 스냅을 종료한다.
+    private Coroutine snapDurationCoroutine = null;  // 조건①: 500ms 하드 리밋
+    private Coroutine comboTimeoutCoroutine = null;  // 조건②: 연타 종료
 
     private const string TrapBiteStateName = "TrapBite";
     private static readonly int CloseTimeHash = Animator.StringToHash("closeTime");
@@ -28,43 +62,35 @@ public class TrapController : MonoBehaviour
     {
         Managers.TrapLogic.AddTrap(gameObject);
         anim = GetComponent<Animator>();
-        sensorZoneCollider = FindSensorZoneCollider();
+        biteZoneCollider = GetComponentInChildren<TrapZoneRelay>()?.GetComponent<Collider2D>();
     }
 
     void OnEnable()
     {
+        BugController.RegisterTrap(this);
         Managers.Input.OnClickPerformed -= Bite;
         Managers.Input.OnClickPerformed += Bite;
     }
 
     void OnDisable()
     {
-        if (biteComboTimerCoroutine != null)
-        {
-            StopCoroutine(biteComboTimerCoroutine);
-            biteComboTimerCoroutine = null;
-        }
-
+        BugController.UnregisterTrap(this);
+        CancelSnap();
         if (Managers.Input == null) return;
-
         Managers.Input.OnClickPerformed -= Bite;
     }
 
     void OnDestroy()
     {
-        if (biteComboTimerCoroutine != null)
-        {
-            StopCoroutine(biteComboTimerCoroutine);
-            biteComboTimerCoroutine = null;
-        }
-
+        CancelSnap();
         if (Managers.Input == null) return;
-
         Managers.Input.OnClickPerformed -= Bite;
     }
 
-    void Update() {
-        if (closeTime > Util.EPS) {
+    void Update()
+    {
+        if (closeTime > Util.EPS)
+        {
             closeTime -= Time.deltaTime;
             if (anim != null) anim.SetFloat(CloseTimeHash, closeTime);
         }
@@ -73,26 +99,7 @@ public class TrapController : MonoBehaviour
     private static BugController GetBugFromCollider(Collider2D other)
     {
         if (other == null) return null;
-
         return other.GetComponentInParent<BugController>();
-    }
-
-    public void HandleSenseEnter(Collider2D other)
-    {
-        if (other == null) return;
-        
-        BugController bug = GetBugFromCollider(other);
-        if (bug == null) return;
-
-        onBugSensed?.Invoke(bug);
-    }
-
-    public void HandleSenseExit(Collider2D other)
-    {
-        BugController bug = GetBugFromCollider(other);
-        if (bug == null) return;
-
-        onBugEscaped?.Invoke(bug);
     }
 
     public void HandleBiteEnter(Collider2D other)
@@ -100,74 +107,133 @@ public class TrapController : MonoBehaviour
         BugController bug = GetBugFromCollider(other);
         if (bug == null) return;
         if (!OnBiteBugs.Contains(bug)) OnBiteBugs.Add(bug);
+        onBugSensed?.Invoke(bug);
     }
 
     public void HandleBiteExit(Collider2D other)
     {
         BugController bug = GetBugFromCollider(other);
         if (bug == null) return;
-
         if (OnBiteBugs.Contains(bug)) OnBiteBugs.Remove(bug);
-    }
-
-    Collider2D FindSensorZoneCollider()
-    {
-        TrapZoneRelay zoneRelays = GetComponent<TrapZoneRelay>();
-
-        Collider2D zoneCollider = zoneRelays.GetComponent<Collider2D>();
-        if (zoneCollider != null) return zoneCollider;
-
-        return null;
-    }
-
-    private IEnumerator BiteComboTimer()
-    {
-        yield return new WaitForSeconds(biteComboTimeout);
-
-        biteComboTimerCoroutine = null;
-        closeTime = 5.0f;
-
-        BugController[] eaten = Preys.ToArray();
-        foreach (var bug in eaten)
-        {
-            if (bug != null)
-            {
-                Preys.Remove(bug);
-                onBugEaten?.Invoke(bug);
-            }
-        }
-
-        if (anim != null) anim.SetFloat(CloseTimeHash, closeTime);
+        onBugEscaped?.Invoke(bug);
     }
 
     public void Bite(Vector2 mousePosition)
     {
-        // 닫혀있는 경우 물지 못함
-        if (closeTime > Util.EPS) return;
-        
-        // 클릭 위치가 센서 범위 내에 있는지 확인
-        sensorZoneCollider = FindSensorZoneCollider();
-        if (sensorZoneCollider == null || !sensorZoneCollider.OverlapPoint(mousePosition)) return;
+        // 닫혀있고 스냅 중도 아닌 경우 물지 못함
+        if (closeTime > Util.EPS && !isSnapping) return;
 
-        // 물기 애니메이션 재생
+        // 클릭 위치가 센서 범위 내에 있는지 확인
+        if (biteZoneCollider == null || !biteZoneCollider.OverlapPoint(mousePosition)) return;
+
+        if (!isSnapping)
+        {
+            // 에너지 확인 및 소모
+            PlantData data = PlantController.Data;
+            if (data == null || data.CurrentEnergy < data.EnergyCostPerBite) return;
+            data.CurrentEnergy -= data.EnergyCostPerBite;
+            Managers.Game.Title.updateEnergy(data.CurrentEnergy);
+
+            // 스냅 시작 — 하드 리밋 코루틴 (리셋 없음)
+            isSnapping = true;
+            FreezeAllBiteBugs();
+            snapDurationCoroutine = StartCoroutine(SnapDurationRoutine());
+        }
+
+        // 물기 애니메이션 재생 (매 클릭마다)
         if (anim != null) anim.Play(TrapBiteStateName, 0, 0f);
 
-        // 연타 타이머 코루틴 초기화
-        if (biteComboTimerCoroutine != null) StopCoroutine(biteComboTimerCoroutine);
-        biteComboTimerCoroutine = StartCoroutine(BiteComboTimer());
+        // 조건② 연타 타이머 리셋 (클릭할 때마다 다시 시작)
+        if (comboTimeoutCoroutine != null) StopCoroutine(comboTimeoutCoroutine);
+        comboTimeoutCoroutine = StartCoroutine(ComboTimeoutRoutine());
 
+        // 데미지 적용 (벌레가 없으면 건너뜀)
+        ApplyBiteDamage();
+    }
+
+    private void ApplyBiteDamage()
+    {
         BugController[] bugsToBite = OnBiteBugs.ToArray();
         foreach (var bug in bugsToBite)
         {
-            if (bug != null)
+            if (bug == null) continue;
+
+            bool isDead = bug.TakeDamage(PlantController.Data.BiteDamage);
+            if (isDead)
             {
-                bool isDead = bug.TakeDamage(PlantController.Data.BiteDamage);
-                if (isDead)
-                {
-                    OnBiteBugs.Remove(bug);
-                    Preys.Add(bug);
-                }
+                OnBiteBugs.Remove(bug);
+                onBugEaten?.Invoke(bug);
             }
         }
+
+        // 조건③: Bite Zone 내 벌레가 모두 사라졌으면 즉시 스냅 종료
+        if (isSnapping && OnBiteBugs.Count == 0)
+        {
+            EndSnap();
+        }
+    }
+
+    // 조건①: 500ms 하드 리밋
+    private IEnumerator SnapDurationRoutine()
+    {
+        yield return new WaitForSeconds(snapDuration);
+        EndSnap();
+    }
+
+    // 조건②: 연타 종료 — 마지막 클릭 후 comboTimeout 초 경과 시 스냅 종료
+    private IEnumerator ComboTimeoutRoutine()
+    {
+        yield return new WaitForSeconds(comboTimeout);
+        EndSnap();
+    }
+
+    /// <summary>
+    /// 세 조건 중 먼저 충족된 쪽이 호출. 중복 호출은 isSnapping 가드로 무시.
+    /// </summary>
+    private void EndSnap()
+    {
+        if (!isSnapping) return;
+        isSnapping = false;
+
+        // 두 코루틴 모두 정리
+        if (snapDurationCoroutine != null) { StopCoroutine(snapDurationCoroutine); snapDurationCoroutine = null; }
+        if (comboTimeoutCoroutine != null) { StopCoroutine(comboTimeoutCoroutine); comboTimeoutCoroutine = null; }
+
+        // 살아남은 벌레 해동 후 탈출 처리
+        foreach (var bug in OnBiteBugs.ToArray())
+        {
+            if (bug != null)
+            {
+                bug.Unfreeze();
+                OnBiteBugs.Remove(bug);
+                onBugEscaped?.Invoke(bug);
+            }
+        }
+
+        CloseAndRecover();
+    }
+
+    private void FreezeAllBiteBugs()
+    {
+        foreach (var bug in OnBiteBugs)
+        {
+            if (bug != null) bug.Freeze();
+        }
+    }
+
+    /// <summary>
+    /// OnDisable / OnDestroy 시 코루틴만 정리 (이벤트/닫힘 처리 없음).
+    /// </summary>
+    private void CancelSnap()
+    {
+        if (snapDurationCoroutine != null) { StopCoroutine(snapDurationCoroutine); snapDurationCoroutine = null; }
+        if (comboTimeoutCoroutine != null) { StopCoroutine(comboTimeoutCoroutine); comboTimeoutCoroutine = null; }
+        isSnapping = false;
+    }
+
+    private void CloseAndRecover()
+    {
+        closeTime = trapClosedDuration;
+        if (anim != null) anim.SetFloat(CloseTimeHash, closeTime);
     }
 }

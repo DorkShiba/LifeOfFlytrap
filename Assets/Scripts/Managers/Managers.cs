@@ -16,7 +16,7 @@ public class Managers : MonoBehaviour {
     // #endregion
 
     // #region Core
-    // DataManager _data = new DataManager();
+    DataManager _data = new DataManager();
     InputManager _input;
     // OptionsManager _options = new OptionsManager();
     PoolManager _pool;
@@ -26,6 +26,7 @@ public class Managers : MonoBehaviour {
     UIManager _ui = new UIManager();
     TrapLogicManager _trapLogic;
     GameManager _game;
+    SpawnManager _spawn;
 
     void Awake()
     {
@@ -33,10 +34,11 @@ public class Managers : MonoBehaviour {
     }
 
     void OnApplicationQuit() {
+        Managers.Data.Save();
         isQuitting = true;
     }
 
-    // public static DataManager Data { get { return Instance._data; } }
+    public static DataManager Data { get { return isQuitting ? null : Instance._data; } }
     public static InputManager Input { get { return isQuitting ? null : Instance._input; } }
     // public static OptionsManager Options { get { return Instance._options; } }
     public static PoolManager Pool { get { return isQuitting? null: Instance._pool; } }
@@ -46,6 +48,7 @@ public class Managers : MonoBehaviour {
     public static UIManager UI { get { return isQuitting? null: Instance._ui; } }
     public static TrapLogicManager TrapLogic { get { return isQuitting? null: Instance._trapLogic; } }
     public static GameManager Game { get { return isQuitting? null: Instance._game; } }
+    public static SpawnManager Spawn { get { return isQuitting? null: Instance._spawn; } }
     // #endregion
 
     public static Coroutine StartCoroutineManager(Func<IEnumerator> func) {
@@ -73,7 +76,14 @@ public class Managers : MonoBehaviour {
             if (_instance._input == null) _instance._input = new InputManager();
             if (_instance._pool == null) _instance._pool = new PoolManager();
             if (_instance._trapLogic == null) _instance._trapLogic = new TrapLogicManager();
+            // GameManager는 반드시 DataManager 다음에 초기화 (생성자에서 Load 호출)
             if (_instance._game == null) _instance._game = new GameManager();
+            // SpawnManager는 GameManager 이후에 초기화 (OnMonthChanged 구독)
+            if (_instance._spawn == null)
+            {
+                _instance._spawn = new SpawnManager();
+                _instance._spawn.Init();
+            }
 
             // Data.Init();
             // Scene.Init();

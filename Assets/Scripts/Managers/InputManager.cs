@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
 using System;
 
 public class InputManager {
@@ -22,16 +24,34 @@ public class InputManager {
 
         // Drag lifecycle: started, performed (click), canceled
         _playerInput.Player.Click.started += _ => {
+            // If pointer is over UI, do not start gameplay drag.
+            Vector2 screenPoint = _playerInput.Player.MousePoint.ReadValue<Vector2>();
+            if (IsPointerOverUI(screenPoint)) {
+                return;
+            }
+
             _isDragging = true;
-            Vector2 world = Camera.main.ScreenToWorldPoint(_playerInput.Player.MousePoint.ReadValue<Vector2>());
+            Vector2 world = Camera.main.ScreenToWorldPoint(screenPoint);
             MousePosition = world;
             OnDragStarted?.Invoke(world);
         };
 
         _playerInput.Player.Click.performed += ctx => {
-            // 기존 클릭 이벤트(단발 클릭) 호출 유지
+            // 기존 클릭 이벤트(단발 클릭) 호출 유지, 단 UI 위에서는 전달하지 않음
+            Vector2 screenPoint = _playerInput.Player.MousePoint.ReadValue<Vector2>();
+            if (IsPointerOverUI(screenPoint)) {
+                return;
+            }
             OnClicked(ctx);
         };
+
+        bool IsPointerOverUI(Vector2 screenPoint) {
+            if (EventSystem.current == null) return false;
+            var eventData = new PointerEventData(EventSystem.current) { position = screenPoint };
+            var results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, results);
+            return results.Count > 0;
+        }
 
         _playerInput.Player.Click.canceled += _ => {
             if (_isDragging) {

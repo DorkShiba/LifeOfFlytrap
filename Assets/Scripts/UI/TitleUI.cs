@@ -2,21 +2,31 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-enum TitleText
+enum TitleTexts
 {
     MonthText,
     TimeText,
     EnergyText
 }
 
+enum TitleButtons
+{
+    ToggleButton,
+}
+
 public class TitleUI : BaseUI {
     private TextMeshProUGUI monthText, timeText, energyText;
+    private Button upgradeToggleButton;
     public override void Init() {
         Managers.UI.SetPopupCanvas(gameObject);
-        Bind<TextMeshProUGUI>(typeof(TitleText));
+        Bind<TextMeshProUGUI>(typeof(TitleTexts));
         monthText = GetText(0);
         timeText = GetText(1);
         energyText = GetText(2);
+
+        Bind<Button>(typeof(TitleButtons));
+        upgradeToggleButton = Get<Button>(0);
+        upgradeToggleButton.onClick.AddListener(OnUpgradeToggleButtonClicked);
     }
 
     public void updateMonth(int month)
@@ -34,5 +44,20 @@ public class TitleUI : BaseUI {
     public void updateEnergy(int energy)
     {
         energyText.text = $"Energy: {energy}";
+    }
+
+    UpgradeList upgradeListPopup;
+
+    public void OnUpgradeToggleButtonClicked()
+    {
+        if (upgradeListPopup != null)
+        {
+            Managers.UI.DestroyUI(upgradeListPopup);
+            upgradeListPopup = null;
+        }
+        else
+        {
+            upgradeListPopup = Managers.UI.ShowPopupUI<UpgradeList>("UpgradeList");
+        }
     }
 }

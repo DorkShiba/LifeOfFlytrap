@@ -12,6 +12,7 @@ public class PlantData : ScriptableObject
     [SerializeField] private int  biteDamage = 1;
     [SerializeField] private int currentEnergy = 100;
     [SerializeField] private int energyRegenRate = 0;
+    [SerializeField] private int energyCostPerBite = 3;
     
     public float AttractionRange {
         get => attractionRange;
@@ -32,5 +33,9 @@ public class PlantData : ScriptableObject
     public int EnergyRegenRate {
         get => energyRegenRate;
         set => energyRegenRate = value;
+    }
+    public int EnergyCostPerBite {
+        get => energyCostPerBite;
+        set => energyCostPerBite = value;
     }
 }

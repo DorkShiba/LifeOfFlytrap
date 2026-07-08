@@ -90,7 +90,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2985579475153159597, guid: 4381168c62b49e94b9de82eadaad0420, type: 3}
       propertyPath: m_Name
-      value: Bug Variant
+      value: Ladybug
       objectReference: {fileID: 0}
     - target: {fileID: 3266640350159472381, guid: 4381168c62b49e94b9de82eadaad0420, type: 3}
       propertyPath: m_Sprite
@@ -125,8 +125,12 @@ MonoBehaviour:
   animator: {fileID: 6683797444822994271}
   currentHP: 0
   velocity: {x: 0, y: 0}
-  data: {fileID: 0}
+  data: {fileID: 11400000, guid: 9006498c43d3c3040ae38a825166a37c, type: 2}
   currentState: 0
+  perlinSpeed: 0.6
+  perlinScale: 1
+  boundaryAdjustmentStrength: 1
+  boundaryApplyBaseProbability: 0.3
 --- !u!95 &6683797444822994271 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 6229434331943295901, guid: 4381168c62b49e94b9de82eadaad0420, type: 3}

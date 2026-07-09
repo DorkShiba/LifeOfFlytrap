@@ -17,29 +17,49 @@ public class ResourceManager {
     }
 
     public GameObject Instantiate(string path, Transform parent = null, Vector3? position = null, Quaternion? rotation = null) {
-        GameObject go;
+        GameObject original = null;
 
         if (_resources.ContainsKey(path)) {
-            go = Object.Instantiate(_resources[path] as GameObject, parent);
-            go.name = path;
+            original = _resources[path] as GameObject;
         }
         else {
-            GameObject original = Load<GameObject>($"Prefabs/{path}");
+            original = Load<GameObject>($"Prefabs/{path}");
             if (original == null) {
                 Debug.Log($"Failed to load prefab : {path}");
                 return null;
             }
+        }
 
-            go = Object.Instantiate(original, parent);
-            go.name = original.name;
+        GameObject go = Instantiate(original, parent, position, rotation);
+        if (go != null && _resources.ContainsKey(path)) {
+            go.name = path; // 기존 로직 유지 (캐시된 경로는 이름으로 덮어씀)
         }
-        if (parent != null) {
-            go.transform.localPosition = position ?? Vector3.zero;
-            go.transform.localRotation = rotation ?? Quaternion.identity;
+        return go;
+    }
+
+    public GameObject Instantiate(GameObject original, Transform parent = null, Vector3? position = null, Quaternion? rotation = null) {
+        if (original == null) {
+            Debug.Log($"Failed to instantiate : original GameObject is null");
+            return null;
         }
-        else {
-            go.transform.position = position ?? Vector3.zero;
-            go.transform.rotation = rotation ?? Quaternion.identity;
+
+        GameObject go = Object.Instantiate(original, parent);
+        go.name = original.name;
+
+        // 위치나 회전값이 명시적으로 주어졌을 때만 덮어씌움 (기본값은 프리팹 원본 유지)
+        if (position != null) {
+            if (parent != null) go.transform.localPosition = position.Value;
+            else go.transform.position = position.Value;
+        }
+        
+        if (rotation != null) {
+            if (parent != null) go.transform.localRotation = rotation.Value;
+            else go.transform.rotation = rotation.Value;
+        }
+
+        // UI(RectTransform) 객체의 경우 부모 캔버스의 스케일에 의해 로컬 스케일이 망가지는 것을 방지
+        if (parent != null && go.GetComponent<RectTransform>() != null) {
+            go.transform.localScale = original.transform.localScale;
         }
 
         return go;

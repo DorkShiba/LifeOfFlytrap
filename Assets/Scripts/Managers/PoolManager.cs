@@ -19,7 +19,7 @@ public class PoolManager {
         }
 
         Poolable Create() {
-            GameObject go = Object.Instantiate<GameObject>(Original);
+            GameObject go = Managers.Resource.Instantiate(Original);
             go.name = Original.name;
             var comp = go.GetComponent<Poolable>();
             if (comp == null)

@@ -40,6 +40,7 @@ public class EndMonth : Popup {
 
     void OnNextMonthClicked() {
         onNextMonth?.Invoke();
-        Managers.UI.DestroyUI(this);
+        Managers.UI.ClosePopupUI(this);
+        Time.timeScale = 1f;
     }
 }

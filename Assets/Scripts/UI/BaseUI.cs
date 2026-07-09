@@ -9,6 +9,9 @@ public abstract class BaseUI : MonoBehaviour {
     protected Dictionary<Type, UnityEngine.Object[]> _objects = new Dictionary<Type, UnityEngine.Object[]>();
     public abstract void Init();
 
+    public virtual void Open() { }
+    public virtual void Close() { }
+
     protected void Bind<T>(Type type) where T : UnityEngine.Object {
         string[] names = Enum.GetNames(type);
         UnityEngine.Object[] objects = new UnityEngine.Object[names.Length];

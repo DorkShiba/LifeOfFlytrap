@@ -11,12 +11,13 @@ enum TitleTexts
 
 enum TitleButtons
 {
-    ToggleButton,
+    UpgradeToggleButton,
+    MenuToggleButton,
 }
 
 public class TitleUI : BaseUI {
     private TextMeshProUGUI monthText, timeText, energyText;
-    private Button upgradeToggleButton;
+    private Button upgradeToggleButton, menuToggleButton;
     public override void Init() {
         Managers.UI.SetPopupCanvas(gameObject);
         Bind<TextMeshProUGUI>(typeof(TitleTexts));
@@ -27,6 +28,8 @@ public class TitleUI : BaseUI {
         Bind<Button>(typeof(TitleButtons));
         upgradeToggleButton = Get<Button>(0);
         upgradeToggleButton.onClick.AddListener(OnUpgradeToggleButtonClicked);
+        menuToggleButton = Get<Button>(1);
+        menuToggleButton.onClick.AddListener(OnMenuToggleButtonClicked);
     }
 
     public void updateMonth(int month)
@@ -52,12 +55,26 @@ public class TitleUI : BaseUI {
     {
         if (upgradeListPopup != null)
         {
-            Managers.UI.DestroyUI(upgradeListPopup);
+            Managers.UI.ClosePopupUI(upgradeListPopup);
             upgradeListPopup = null;
         }
         else
         {
             upgradeListPopup = Managers.UI.ShowPopupUI<UpgradeList>("UpgradeList");
+        }
+    }
+
+    MenuList menuListPopup;
+    public void OnMenuToggleButtonClicked()
+    {
+        if (menuListPopup != null)
+        {
+            Managers.UI.ClosePopupUI(menuListPopup);
+            menuListPopup = null;
+        }
+        else
+        {
+            menuListPopup = Managers.UI.ShowPopupUI<MenuList>("MenuList");
         }
     }
 }

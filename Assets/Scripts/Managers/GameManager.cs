@@ -18,6 +18,7 @@ public class GameManager
 
     public GameManager()
     {
+        Debug.Log("TitleUI 생성 전");
         title = Managers.UI.MakeWorldSpaceUI<TitleUI>(null, "TitleUI");
         title.setAnchoredPosition(title.gameObject, new Vector2(0, 0));
 

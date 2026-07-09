@@ -61,21 +61,33 @@ public class Managers : MonoBehaviour {
         Instance.StopCoroutine(coroutine);
     }
 
-    static void Init() {
-        if (_instance == null) {
+    static bool _isInitialized = false;
+
+    static void Init()
+    {
+        if (_instance == null && !_isInitialized)
+        {
+            _isInitialized = true; // 중복 호출 방지 플래그 설정
+
             GameObject go = GameObject.Find("@Managers");
-            if (go == null) {
-                go = new GameObject("@Managers");
+            if (go == null)
+            {
+                go = new GameObject { name = "@Managers" };
+                // AddComponent를 호출하면 유니티가 즉시 Awake()를 실행하여 내부적으로 다시 Init()을 호출합니다.
+                // _isInitialized 플래그 덕분에 Awake() 안에서의 Init() 호출은 무시됩니다.
                 go.AddComponent<Managers>();
             }
 
             DontDestroyOnLoad(go);
             _instance = go.GetComponent<Managers>();
 
-            // Awake에서 호출되므로 여기서는 실제 초기화만 진행
             if (_instance._input == null) _instance._input = new InputManager();
             if (_instance._pool == null) _instance._pool = new PoolManager();
             if (_instance._trapLogic == null) _instance._trapLogic = new TrapLogicManager();
+            
+            // UIManager는 UI 캐싱을 위해 가장 먼저 Init 되어야 함
+            _instance._ui.Init();
+
             // GameManager는 반드시 DataManager 다음에 초기화 (생성자에서 Load 호출)
             if (_instance._game == null) _instance._game = new GameManager();
             // SpawnManager는 GameManager 이후에 초기화 (OnMonthChanged 구독)

@@ -1,12 +1,12 @@
-using UnityEngine;
-using UnityEngine.UI;
+// using UnityEngine;
+// using UnityEngine.UI;
 
-public class SceneUI : BaseUI {
-    public override void Init() {
-        Managers.UI.SetPopupCanvas(gameObject);
-    }
+// public class SceneUI : BaseUI {
+//     public override void Init() {
+//         Managers.UI.SetPopupCanvas(gameObject);
+//     }
 
-    public virtual void ClosePopupUI() {
+//     public virtual void ClosePopupUI() {
 
-    }
-}
+//     }
+// }

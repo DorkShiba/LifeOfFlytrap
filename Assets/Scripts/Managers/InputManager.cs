@@ -78,6 +78,16 @@ public class InputManager {
             MousePosition = world;
             OnDragPerformed?.Invoke(world);
         }
+
+        // 임시 게임 종료 로직 (ESC 키)
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
     }
 
     void OnClicked(InputAction.CallbackContext context)

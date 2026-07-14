@@ -7,8 +7,7 @@ public interface ITrap
     Vector2 ColliderSize { get; }
     float LandingRadius { get; }
     bool IsAvailable { get; }
-    void Occupy(BugController bug);
-    void Vacate(BugController bug);
+
 }
 
 // 에너지로 강화하는 "벌레가 잎에 더 잘 모이게" 업그레이드를 여기 연결하세요.

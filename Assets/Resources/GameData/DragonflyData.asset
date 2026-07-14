@@ -15,7 +15,8 @@ MonoBehaviour:
   hp: 1
   moveSpeed: 5
   baseApproachChancePercent: 20
-  energyValue: 5
+  energyValue: 7
+  digestionTime: 10
   firstAppearMonth: 4
   spawnWeight: 70
   prefabName: Bug/Dragonfly

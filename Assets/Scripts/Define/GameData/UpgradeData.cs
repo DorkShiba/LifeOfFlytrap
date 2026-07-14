@@ -10,7 +10,7 @@ public class UpgradeCostEntry
     public List<int> Costs = new List<int>();
 }
 
-[CreateAssetMenu(fileName = "New Upgrade Data", menuName = "EntityData/UpgradeData", order = 2)]
+[CreateAssetMenu(fileName = "New Upgrade Data", menuName = "GameData/UpgradeData", order = 2)]
 public class UpgradeData : ScriptableObject
 {
     [Header("업그레이드 비용 (Max Level 7)")]
@@ -44,8 +44,9 @@ public class UpgradeData : ScriptableObject
             if (entry.Option == option && entry.Costs.Count > 0)
                 return entry.Costs;
         }
-        
+
         // 에디터에서 세팅하지 않았을 경우를 위한 기본값 (각 7단계)
+
         int[] defaultCosts;
         switch (option)
         {

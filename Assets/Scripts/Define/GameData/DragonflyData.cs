@@ -1,11 +1,11 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using System;
 
 [Serializable]
-[CreateAssetMenu(fileName = "New Dragonfly Data", menuName = "EntityData/DragonflyData", order = 1)]
-public class DragonflyData: BugData
+[CreateAssetMenu(fileName = "New Dragonfly Data", menuName = "GameData/Bug/DragonflyData", order = 1)]
+public class DragonflyData : BugData
 {
     // Wandering 파라미터
     [SerializeField] private float baseStopTime = 5f;

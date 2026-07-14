@@ -18,17 +18,17 @@ public class PlantController : MonoBehaviour
         _instance = this;
         
         // 1. 에셋 원본이 오염되지 않도록 원본을 불러와서 복제(Clone)하여 런타임용으로 사용합니다.
-        PlantData originalData = Managers.Resource.Load<PlantData>("EntityData/PlantData");
+        PlantData originalData = Managers.Resource.Load<PlantData>("GameData/PlantData");
         data = Instantiate(originalData);
 
-        // 업그레이드 단계 초기화 (기본값)
+        // 업그레이드 단계 초기화 (기본값 레벨 1)
         upgradeLevels = new Dictionary<PlantDefines.UpgradeOptions, int>
         {
-            { PlantDefines.UpgradeOptions.AddLeaf,    0 },
-            { PlantDefines.UpgradeOptions.StrongBite,  0 },
-            { PlantDefines.UpgradeOptions.StrongScent, 0 },
-            { PlantDefines.UpgradeOptions.DeepRoot,    0 },
-            { PlantDefines.UpgradeOptions.SturdyStem,  0 },
+            { PlantDefines.UpgradeOptions.AddLeaf,     1 },
+            { PlantDefines.UpgradeOptions.StrongBite,  1 },
+            { PlantDefines.UpgradeOptions.StrongScent, 1 },
+            { PlantDefines.UpgradeOptions.DeepRoot,    1 },
+            { PlantDefines.UpgradeOptions.SturdyStem,  1 },
         };
 
         // 2. 세이브 데이터 로드 시도
@@ -41,21 +41,24 @@ public class PlantController : MonoBehaviour
             data.EnergyRegenRate = saved.energyRegenRate;
             data.EnergyCostPerBite = saved.energyCostPerBite;
 
-            upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf] = saved.addLeafLevel;
-            upgradeLevels[PlantDefines.UpgradeOptions.StrongBite] = saved.strongBiteLevel;
-            upgradeLevels[PlantDefines.UpgradeOptions.StrongScent] = saved.strongScentLevel;
-            upgradeLevels[PlantDefines.UpgradeOptions.DeepRoot] = saved.deepRootLevel;
-            upgradeLevels[PlantDefines.UpgradeOptions.SturdyStem] = saved.sturdyStemLevel;
+            // 하위 호환을 위해 세이브 값이 0이면 1로 보정
+            upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf] = Mathf.Max(1, saved.addLeafLevel);
+            upgradeLevels[PlantDefines.UpgradeOptions.StrongBite] = Mathf.Max(1, saved.strongBiteLevel);
+            upgradeLevels[PlantDefines.UpgradeOptions.StrongScent] = Mathf.Max(1, saved.strongScentLevel);
+            upgradeLevels[PlantDefines.UpgradeOptions.DeepRoot] = Mathf.Max(1, saved.deepRootLevel);
+            upgradeLevels[PlantDefines.UpgradeOptions.SturdyStem] = Mathf.Max(1, saved.sturdyStemLevel);
 
-            // 트랩 복원: 기본 1개 + AddLeaf 구매 횟수
-            int trapCount = 1 + saved.addLeafLevel;
+            // 트랩 복원: AddLeaf 레벨만큼 트랩 생성
+            int trapCount = upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf];
             for (int i = 0; i < trapCount; i++)
                 CreateTraps();
         }
         else
         {
             // 세이브가 없으면 위에서 복제해둔 원본(ScriptableObject)의 수치를 그대로 사용
-            CreateTraps(); // 신규 게임: 트랩 1개
+            int trapCount = upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf];
+            for (int i = 0; i < trapCount; i++)
+                CreateTraps();
         }
 
         // 초기화 및 세이브 복원이 끝난 직후, 로드된 에너지 값을 UI에 반영합니다.
@@ -64,8 +67,11 @@ public class PlantController : MonoBehaviour
             Managers.Game.Title.updateEnergy(data.CurrentEnergy);
         }
 
-        Managers.Game.OnMonthChanged -= HandleMonthChange;
-        Managers.Game.OnMonthChanged += HandleMonthChange;
+        if (Managers.Game.CurrentSession != null)
+        {
+            Managers.Game.CurrentSession.OnMonthChanged -= HandleMonthChange;
+            Managers.Game.CurrentSession.OnMonthChanged += HandleMonthChange;
+        }
 
         if (spriteRenderer != null && PlantDefines.PlantSprites.Count > 0)
             spriteRenderer.sprite = PlantDefines.PlantSprites[Mathf.Clamp(traps.Count - 1, 0, PlantDefines.PlantSprites.Count - 1)];

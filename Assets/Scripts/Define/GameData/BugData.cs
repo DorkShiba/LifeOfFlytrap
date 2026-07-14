@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
+[CreateAssetMenu(fileName = "New Bug Data", menuName = "GameData/Bug/BugData", order = 1)]
 public class BugData : ScriptableObject
 {
     [SerializeField] private int hp = 1;
@@ -12,7 +13,9 @@ public class BugData : ScriptableObject
     [Tooltip("매 주기마다 트랩에 접근할 기본 확률(%) (BugController.BaseApproachChancePercent)")]
     [SerializeField] private float baseApproachChancePercent = 20f;
     [Tooltip("잡혔을 때 식물에 주는 에너지량 (BugController.EnergyValue)")]
-    [SerializeField] private float energyValue = 5f;
+    [SerializeField] private int energyValue = 5;
+    [Tooltip("트랩에 잡혔을 때 소화에 걸리는 추가 시간 (초)")]
+    [SerializeField] private float digestionTime = 2f;
     [Header("Spawn Settings")]
     [Tooltip("이 벌레가 처음 등장하는 달 (1~12)")]
     [SerializeField] private int firstAppearMonth = 1;
@@ -26,7 +29,8 @@ public class BugData : ScriptableObject
     // BugController AI 스탯
     public float MoveSpeed => moveSpeed;
     public float BaseApproachChancePercent => baseApproachChancePercent;
-    public float EnergyValue => energyValue;
+    public int EnergyValue => energyValue;
+    public float DigestionTime => digestionTime;
 
     public int FirstAppearMonth => firstAppearMonth;
     public float SpawnWeight => spawnWeight;

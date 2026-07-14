@@ -21,7 +21,7 @@ public class Managers : MonoBehaviour {
     // OptionsManager _options = new OptionsManager();
     PoolManager _pool;
     ResourceManager _resource = new ResourceManager();
-    // SceneManagerEx _scene = new SceneManagerEx();
+    SceneManager _scene = new SceneManager();
     // SoundManager _sound = new SoundManager();
     UIManager _ui = new UIManager();
     TrapLogicManager _trapLogic;
@@ -43,7 +43,7 @@ public class Managers : MonoBehaviour {
     // public static OptionsManager Options { get { return Instance._options; } }
     public static PoolManager Pool { get { return isQuitting? null: Instance._pool; } }
     public static ResourceManager Resource { get { return isQuitting? null: Instance._resource; } }
-    // public static SceneManagerEx Scene { get { return Instance._scene; } }
+    public static SceneManager Scene { get { return isQuitting? null: Instance._scene; } }
     // public static SoundManager Sound { get { return Instance._sound; } }
     public static UIManager UI { get { return isQuitting? null: Instance._ui; } }
     public static TrapLogicManager TrapLogic { get { return isQuitting? null: Instance._trapLogic; } }
@@ -63,7 +63,7 @@ public class Managers : MonoBehaviour {
 
     static bool _isInitialized = false;
 
-    static void Init()
+    public static void Init()
     {
         if (_instance == null && !_isInitialized)
         {
@@ -98,7 +98,7 @@ public class Managers : MonoBehaviour {
             }
 
             // Data.Init();
-            // Scene.Init();
+            _instance._scene.Init();
             // Pool.Init();
             // Options.Init();
             // Sound.Init();
@@ -112,12 +112,13 @@ public class Managers : MonoBehaviour {
 
         // Combat.Update();
         // Camera.Update();
-        Game.Update(Time.deltaTime);
+        Game.CurrentSession?.Update(Time.deltaTime);
         Input.Update();
     }
 
     public static void Clear() {
-        // Scene.Clear();
+        Scene?.Clear();
+        TrapLogic?.Clear();
         // Pool.Clear();
         // Sound.Clear();
         // UI.Clear();

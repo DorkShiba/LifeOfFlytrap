@@ -1,32 +1,36 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using System;
 
 [Serializable]
-[CreateAssetMenu(fileName = "New Plant Data", menuName = "EntityData/PlantData", order = 1)]
+[CreateAssetMenu(fileName = "New Plant Data", menuName = "GameData/PlantData", order = 1)]
 public class PlantData : ScriptableObject
 {
 
-    [SerializeField] private int  biteDamage = 1;
+    [SerializeField] private int biteDamage = 1;
     [SerializeField] private int currentEnergy = 100;
     [SerializeField] private int energyRegenRate = 0;
     [SerializeField] private int energyCostPerBite = 3;
 
 
-    public int BiteDamage {
+    public int BiteDamage
+    {
         get => biteDamage;
         set => biteDamage = value;
     }
-    public int CurrentEnergy {
+    public int CurrentEnergy
+    {
         get => currentEnergy;
         set => currentEnergy = value;
     }
-    public int EnergyRegenRate {
+    public int EnergyRegenRate
+    {
         get => energyRegenRate;
         set => energyRegenRate = value;
     }
-    public int EnergyCostPerBite {
+    public int EnergyCostPerBite
+    {
         get => energyCostPerBite;
         set => energyCostPerBite = value;
     }

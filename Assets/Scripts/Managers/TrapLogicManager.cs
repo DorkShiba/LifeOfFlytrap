@@ -1,13 +1,13 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using System.Collections.Generic;
-using System;
 
 public class TrapLogicManager
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public List<GameObject> bugs { get; private set; } = new List<GameObject>();
-    public List<GameObject> traps { get; private set; } =  new List<GameObject>();
+    public List<GameObject> traps { get; private set; } = new List<GameObject>();
 
     void Update()
     {
@@ -23,9 +23,16 @@ public class TrapLogicManager
         bugs.RemoveAll(b => b == null);
     }
 
+    public void Clear()
+    {
+        bugs.Clear();
+        traps.Clear();
+    }
+
     public void AddBug(GameObject bug)
     {
-        if (bug == null || bugs.Contains(bug)) {
+        if (bug == null || bugs.Contains(bug))
+        {
             return;
         }
 
@@ -34,7 +41,8 @@ public class TrapLogicManager
 
     public void AddTrap(GameObject trap)
     {
-        if (trap == null || traps.Contains(trap)) {
+        if (trap == null || traps.Contains(trap))
+        {
             return;
         }
 
@@ -69,17 +77,17 @@ public class TrapLogicManager
         PlantData data = PlantController.Data;
         if (data != null)
         {
-            data.CurrentEnergy += Mathf.RoundToInt(bug.EnergyValue);
+            data.CurrentEnergy += bug.EnergyValue;
             Managers.Game.Title.updateEnergy(data.CurrentEnergy);
 
             // 클리어 조건 달성 시 화면 프리즈 및 EndMonth 팝업 표시
-            int currentMonth = Managers.Game.CurrentMonth;
+            int currentMonth = Managers.Game.CurrentSession?.CurrentMonth ?? 3;
             int monthIndex = currentMonth - 1;
-            if (monthIndex >= 0 && monthIndex < Util.ClearConstraints.Count
-                && data.CurrentEnergy >= Util.ClearConstraints[monthIndex]
-                && !Managers.Game.IsFrozen)
+            if (monthIndex >= 0 && monthIndex < GameData.Instance.ClearConstraints.Count
+                && data.CurrentEnergy >= GameData.Instance.ClearConstraints[monthIndex]
+                && (Managers.Game.CurrentSession != null && !Managers.Game.CurrentSession.IsFrozen))
             {
-                Managers.Game.FreezeForEndMonth();
+                Managers.Game.CurrentSession?.FreezeForEndMonth();
             }
         }
 

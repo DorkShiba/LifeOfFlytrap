@@ -21,11 +21,11 @@ public class PlantDefines
         {
             if (_data == null)
             {
-                // Resources/EntityData/UpgradeData.asset 으로 저장한다고 가정
-                _data = Resources.Load<UpgradeData>("EntityData/UpgradeData");
+                // Resources/GameData/UpgradeData.asset 으로 저장한다고 가정
+                _data = Resources.Load<UpgradeData>("GameData/UpgradeData");
                 if (_data == null)
                 {
-                    Debug.LogError("UpgradeData 에셋을 Resources/EntityData/ 폴더에서 찾을 수 없습니다!");
+                    Debug.LogError("UpgradeData 에셋을 Resources/GameData/ 폴더에서 찾을 수 없습니다!");
                 }
             }
             return _data;

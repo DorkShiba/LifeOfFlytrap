@@ -11,8 +11,8 @@ public class DataManager
         SaveData data = new SaveData();
 
         // GameManager 상태 수집
-        data.currentMonth = Managers.Game.CurrentMonth;
-        data.monthTimer   = Managers.Game.MonthTimer;
+        data.currentMonth = Managers.Game.CurrentSession?.CurrentMonth ?? 3;
+        data.monthTimer   = Managers.Game.CurrentSession?.MonthTimer ?? 0f;
 
         // PlantData 상태 수집
         PlantData plant = PlantController.Data;

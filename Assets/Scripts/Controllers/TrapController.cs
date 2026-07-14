@@ -32,9 +32,6 @@ public class TrapController : MonoBehaviour, ITrap
     [Tooltip("벨레가 착지하는 반지름(유닛)")]
     [SerializeField] private float landingRadius = 0.3f;
 
-    // 현재 이 트랩을 점유 중인 벨레 (다존 점유가 필요하면 List로 변경)
-    private BugController occupant = null;
-
     public Vector3 Position => transform.position;
     public Vector2 ColliderSize
     {
@@ -45,23 +42,15 @@ public class TrapController : MonoBehaviour, ITrap
         }
     }
     public float LandingRadius => PlantDefines.GetCurrentLandingRadius();
-    public bool IsAvailable => closeTime <= Util.EPS && occupant == null;
-
-    public void Occupy(BugController bug)
-    {
-        occupant = bug;
-    }
-
-    public void Vacate(BugController bug)
-    {
-        if (occupant == bug) occupant = null;
-    }
+    public bool IsAvailable => closeTime <= Util.EPS;
 
     private float closeTime = 0.0f;
     private bool isSnapping = false;
     // 두 코루틴 중 먼저 발화하는 쪽이 스냅을 종료한다.
     private Coroutine snapDurationCoroutine = null;  // 조건①: 500ms 하드 리밋
     private Coroutine comboTimeoutCoroutine = null;  // 조건②: 연타 종료
+
+    private float currentSnapMaxDigestionTime = 0f;
 
     private const string TrapBiteStateName = "TrapBite";
     private static readonly int CloseTimeHash = Animator.StringToHash("closeTime");
@@ -142,6 +131,7 @@ public class TrapController : MonoBehaviour, ITrap
 
             // 스냅 시작 — 하드 리밋 코루틴 (리셋 없음)
             isSnapping = true;
+            currentSnapMaxDigestionTime = 0f;
             FreezeAllBiteBugs();
             snapDurationCoroutine = StartCoroutine(SnapDurationRoutine());
         }
@@ -167,6 +157,7 @@ public class TrapController : MonoBehaviour, ITrap
             bool isDead = bug.TakeDamage(PlantController.Data.BiteDamage);
             if (isDead)
             {
+                currentSnapMaxDigestionTime = Mathf.Max(currentSnapMaxDigestionTime, bug.DigestionTime);
                 OnBiteBugs.Remove(bug);
                 onBugEaten?.Invoke(bug);
             }
@@ -216,7 +207,7 @@ public class TrapController : MonoBehaviour, ITrap
             }
         }
 
-        CloseAndRecover();
+        CloseAndRecover(currentSnapMaxDigestionTime);
     }
 
     private void FreezeAllBiteBugs()
@@ -237,9 +228,10 @@ public class TrapController : MonoBehaviour, ITrap
         isSnapping = false;
     }
 
-    private void CloseAndRecover()
+    private void CloseAndRecover(float maxDigestionTime)
     {
-        closeTime = trapClosedDuration;
+        // 먹은 벌레가 있다면 가장 긴 소화 시간을, 하나도 못 먹었다면 기본 닫힘 시간을 적용
+        closeTime = maxDigestionTime > 0f ? maxDigestionTime : trapClosedDuration;
         if (anim != null) anim.SetFloat(CloseTimeHash, closeTime);
     }
 }

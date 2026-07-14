@@ -10,14 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 013093688a5410d42b82a7b5427c08a3, type: 3}
-  m_Name: FlyData
+  m_Name: LonghornData
   m_EditorClassIdentifier: Assembly-CSharp::FlyData
-  hp: 1
-  moveSpeed: 2.5
-  baseApproachChancePercent: 90
-  energyValue: 5
-  firstAppearMonth: 3
-  spawnWeight: 100
-  prefabName: Bug/Fly
+  hp: 10
+  moveSpeed: 7
+  baseApproachChancePercent: 20
+  energyValue: 8
+  digestionTime: 12
+  firstAppearMonth: 7
+  spawnWeight: 30
+  prefabName: Bug/Longhorn
   jitterDegPerSecond: 25
   landDurationSeconds: 2

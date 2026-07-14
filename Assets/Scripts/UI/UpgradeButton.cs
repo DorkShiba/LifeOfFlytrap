@@ -1,7 +1,7 @@
-using UnityEngine;
-using UnityEngine.UI;
 using System;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 enum InsideTexts
 {
@@ -63,12 +63,12 @@ public class UpgradeButton : Popup
 
     public void updateCost(int cost)
     {
-        costText.text = $"Cost: {cost}";
+        costText.text = $"소모에너지: {cost}";
     }
 
     public void updateUpgradeChange(int prev, int next)
     {
-        upgradeChangeText.text = $"{prev} -> {next}";
+        upgradeChangeText.text = $"레벨: {prev} -> {next}";
     }
 
     private void OnClicked()

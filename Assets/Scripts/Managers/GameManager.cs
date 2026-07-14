@@ -1,88 +1,38 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class GameManager
 {
-    private float MONTH_DURATION = 180f; // 3 minutes
-    private float monthTimer = 0f;
     private TitleUI title;
-
-    public bool IsFrozen { get; private set; } = false;
-
     public TitleUI Title => title;
-    public int CurrentMonth { get; private set; }
-    public float MonthTimer => monthTimer;
 
-    public Action<int> OnMonthChanged;
+    // 현재 플레이 중인 세션
+    public GameSession CurrentSession { get; private set; }
 
     public GameManager()
     {
-        Debug.Log("TitleUI 생성 전");
-        title = Managers.UI.MakeWorldSpaceUI<TitleUI>(null, "TitleUI");
-        title.setAnchoredPosition(title.gameObject, new Vector2(0, 0));
-
-        // 세이브 데이터가 있으면 복원, 없으면 기본값 사용
-        SaveData saved = Managers.Data.Load();
-        if (saved != null)
-        {
-            CurrentMonth = saved.currentMonth;
-            monthTimer = saved.monthTimer;
-        }
-        else
-        {
-            CurrentMonth = 3;
-            monthTimer = 0f;
-        }
-
-        title.updateMonth(CurrentMonth);
-        title.updateTime(monthTimer);
-        if (PlantController.Data != null)
-            title.updateEnergy(PlantController.Data.CurrentEnergy);
+        // GameManager 생성 시점이 Init 씬일 수 있으므로 UI 생성을 StartGame으로 미룹니다.
     }
 
-    public void Update(float deltaTime)
+    public void StartGame()
     {
-        if (IsFrozen) return;
-
-        monthTimer += deltaTime;
-        title.updateTime(monthTimer);
-        if (monthTimer >= MONTH_DURATION)
+        // 메인 씬 로딩이 완료된 후에 UI를 생성해야 파괴되지 않습니다.
+        if (title == null)
         {
-            monthTimer = 0f;
-            CurrentMonth++;
-            title.updateMonth(CurrentMonth);
-            OnMonthChanged?.Invoke(CurrentMonth);
+            title = Managers.UI.MakeWorldSpaceUI<TitleUI>(null, "TitleUI");
+            if (title != null)
+                title.setAnchoredPosition(title.gameObject, new Vector2(0, 0));
         }
+
+        CurrentSession = new GameSession();
+        CurrentSession.Init();
+
+        // Title 씬이 켜지거나 게임 시작될 때 SpawnManager 구독 갱신 등 필요하다면 추가
+        Managers.Spawn.Init();
     }
 
-    /// <summary>
-    /// 클리어 조건 달성 시 호출. 게임을 멈추고 EndMonth 팝업을 띄운다.
-    /// </summary>
-    public void FreezeForEndMonth()
+    public void GameOver()
     {
-        if (IsFrozen) return;
-        IsFrozen = true;
-        Time.timeScale = 0f;
-
-        EndMonth popup = Managers.UI.ShowPopupUI<EndMonth>("EndMonth");
-        popup.SetInfo(CurrentMonth + 1, AdvanceToNextMonth);
-    }
-
-    /// <summary>
-    /// EndMonth 팝업의 NextMonthButton 클릭 시 호출. 다음 달로 진행한다.
-    /// </summary>
-    public void AdvanceToNextMonth()
-    {
-        if (!IsFrozen) return;
-        IsFrozen = false;
-        Time.timeScale = 1f;
-
-        monthTimer = 0f;
-        CurrentMonth++;
-        title.updateMonth(CurrentMonth);
-        OnMonthChanged?.Invoke(CurrentMonth);
-
-        Managers.Data.Save();
+        CurrentSession = null;
     }
 }

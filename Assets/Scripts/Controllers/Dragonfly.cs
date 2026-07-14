@@ -23,7 +23,7 @@ public class DragonFly : BugController
     void Awake()
     {
         Managers.TrapLogic.AddBug(gameObject);
-        data = Managers.Resource.Load<DragonflyData>("EntityData/DragonflyData");
+        data = Managers.Resource.Load<DragonflyData>("GameData/DragonflyData");
         if (data != null)
         {
             InitializeHP(data.HP);
@@ -36,25 +36,23 @@ public class DragonFly : BugController
     // 잠자리는 BugController FSM(Wander/Approach/Landed)을 사용하지 않지만
     // abstract이므로 컴파일을 위해 구현해둔다.
     // ─────────────────────────────────────────────
-    public override float EnergyValue => data != null ? data.EnergyValue : 0f;
+    public override int EnergyValue => data != null ? data.EnergyValue : 0;
+    public override float DigestionTime => data != null ? data.DigestionTime : 0f;
     protected override float MoveSpeed => data != null ? data.MoveSpeed : 3f;
-    protected override float JitterDegPerSecond => 0f;   // DragonFly는 배회 FSM 미사용
     protected override float BaseApproachChancePercent => data != null ? data.BaseApproachChancePercent : 0f;
-    protected override float LandDurationSeconds => 0f;   // DragonFly는 착지 FSM 미사용
 
     // ─────────────────────────────────────────────
     // 잠자리 고유 Update (BugController FSM 미사용)
     // ─────────────────────────────────────────────
-    protected override void Update()
+    protected override void OnFixedUpdate(float dt)
     {
-        // Freeze 중에는 이동 정지 (BugController.Update 패턴 준수)
-        // base.Update()는 호출하지 않음 — 잠자리는 자체 FSM을 사용한다.
-        DragonFlyMove();
+        // Freeze 중에는 이동 정지 (BugController.FixedUpdate 패턴 준수)
+        DragonFlyMove(dt);
     }
 
-    private void DragonFlyMove()
+    private void DragonFlyMove(float dt)
     {
-        timer -= Time.deltaTime;
+        timer -= dt;
         if (state == DragonflyState.Idle)
         {
             if (timer <= Util.EPS) EnterRotate();
@@ -65,29 +63,48 @@ public class DragonFly : BugController
         }
         else if (state == DragonflyState.Ready)
         {
-            transform.position -= (Vector3)(direction * data.MoveSpeed *
-                data.DecelMultiplier * Time.deltaTime);
+            Vector2 delta = -(Vector2)direction * data.MoveSpeed * data.DecelMultiplier * dt;
+            if (rb != null) rb.MovePosition(rb.position + delta);
+            else transform.position += (Vector3)delta;
+
             if (timer <= Util.EPS) EnterRush();
         }
         else if (state == DragonflyState.Rush)
         {
-            transform.position += (Vector3)(velocity * Time.deltaTime);
+            Vector2 delta = velocity * dt;
+            if (rb != null) rb.MovePosition(rb.position + delta);
+            else transform.position += (Vector3)delta;
+
             if (timer <= Util.EPS) EnterDecel();
         }
         else if (state == DragonflyState.Decel)
         {
             velocity = Vector2.Lerp(velocity, Vector2.zero, 1 - timer / data.DecelTime);
-            transform.position += (Vector3)(velocity * Time.deltaTime);
+            Vector2 delta = velocity * dt;
+            if (rb != null) rb.MovePosition(rb.position + delta);
+            else transform.position += (Vector3)delta;
+
             if (timer <= Util.EPS) EnterIdle();
         }
     }
 
     Vector2 SelectDirection()
     {
-        // 경계 근처면 안쪽을 향하는 방향만 허용
+        // 일정 확률로 가장 가까운 트랩을 조준
+        float chance = PlantDefines.GetCurrentLandingChance();
+        if (Random.Range(0f, 100f) < chance)
+        {
+            ITrap trap = SelectTrap();
+            if (trap != null)
+            {
+                return ((Vector2)trap.Position - (Vector2)transform.position).normalized;
+            }
+        }
+
+        // 확률이 빗나가거나 트랩이 없으면 경계를 고려한 랜덤 방향 선택
         Vector2 pos = transform.position;
-        float halfW = Util.MapWidth * 0.5f;
-        float halfH = Util.MapHeight * 0.5f;
+        float halfW = GameData.Instance.MapWidth * 0.5f;
+        float halfH = GameData.Instance.MapHeight * 0.5f;
         float margin = data.RushDistanceBound + 1f;
 
         for (int i = 0; i < 10; i++)

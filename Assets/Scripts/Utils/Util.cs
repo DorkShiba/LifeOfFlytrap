@@ -10,9 +10,6 @@ public class Util
         return Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg;
     }
 
-    public const float MapWidth = 11.25f * 2;  // 맵의 가로 크기
-    public const float MapHeight = 7.5f * 2; // 맵의 세로
-
     public static float BoxMuller(float m, float s, float min, float max)
     {
         float z = Mathf.Sqrt(-2.0f * Mathf.Log(Random.Range(EPS, 1.0f))) * Mathf.Cos(2.0f * Mathf.PI * Random.Range(EPS, 1.0f));
@@ -49,11 +46,4 @@ public class Util
 
         return null;
     }
-
-    public static List<int> ClearConstraints = new List<int>{
-        1000, 1000, 1000,
-        1000, 1000, 1000,
-        1000, 1000, 1000,
-        1000, 1000, 1000
-    };
 }

@@ -20,4 +20,12 @@ public class SaveData
     public int strongScentLevel;
     public int deepRootLevel;
     public int sturdyStemLevel;
+
+    // 월 시작 시점의 상태
+    public int startMonthEnergy;
+    public int startMonthAddLeafLevel;
+    public int startMonthStrongBiteLevel;
+    public int startMonthStrongScentLevel;
+    public int startMonthDeepRootLevel;
+    public int startMonthSturdyStemLevel;
 }

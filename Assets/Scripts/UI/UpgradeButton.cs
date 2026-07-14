@@ -9,8 +9,9 @@ enum InsideTexts
     UpgradeChange,
 }
 
-public class UpgradeButton : Popup
+public class UpgradeButton : BaseUI
 {
+    private bool _init = false;
     private TextMeshProUGUI costText, upgradeChangeText;
     private Button button;
     private PlantDefines.UpgradeOptions option;
@@ -18,7 +19,8 @@ public class UpgradeButton : Popup
 
     public override void Init()
     {
-        base.Init();
+        if (_init) return;
+        _init = true;
         Bind<TextMeshProUGUI>(typeof(InsideTexts));
         costText = Get<TextMeshProUGUI>(0);
         upgradeChangeText = Get<TextMeshProUGUI>(1);

@@ -11,14 +11,20 @@ enum UpgradeButtons
     SturdyStemButton,
 }
 
-public class UpgradeList : Popup
+public class UpgradeList : BaseUI
 {
+    private bool _init = false;
+    void Start()
+    {
+        Init();
+    }
     private UpgradeButton addLeafButton, strongBiteButton,
         strongScentButton, deeperRootButton, sturdyStemButton;
 
     public override void Init()
     {
-        base.Init();
+        if (_init) return;
+        _init = true;
         Bind<UpgradeButton>(typeof(UpgradeButtons));
         addLeafButton    = Get<UpgradeButton>(0);
         strongBiteButton  = Get<UpgradeButton>(1);

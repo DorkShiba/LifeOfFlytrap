@@ -6,12 +6,37 @@ public class PlantController : MonoBehaviour
     private List<TrapController> traps = new List<TrapController>();
 
     private static PlantController _instance;
+    public static PlantController Instance => _instance;
     private static PlantData data;
     public static PlantData Data => data;
     [SerializeField] SpriteRenderer spriteRenderer;
 
     /// <summary>각 업그레이드의 현재 구매 횟수 (0 = 미구매)</summary>
     private Dictionary<PlantDefines.UpgradeOptions, int> upgradeLevels;
+
+    // 월 시작 시점의 에너지와 업그레이드 레벨
+    public int StartMonthEnergy { get; private set; }
+    private Dictionary<PlantDefines.UpgradeOptions, int> startMonthUpgradeLevels;
+
+    public int GetStartMonthLevel(PlantDefines.UpgradeOptions option)
+    {
+        if (startMonthUpgradeLevels == null) return 1;
+        return startMonthUpgradeLevels.TryGetValue(option, out int level) ? level : 1;
+    }
+
+    public void UpdateStartMonthState()
+    {
+        if (data != null)
+            StartMonthEnergy = data.CurrentEnergy;
+        
+        if (upgradeLevels != null)
+        {
+            foreach (var kvp in upgradeLevels)
+            {
+                startMonthUpgradeLevels[kvp.Key] = kvp.Value;
+            }
+        }
+    }
 
     void Start()
     {
@@ -31,6 +56,16 @@ public class PlantController : MonoBehaviour
             { PlantDefines.UpgradeOptions.SturdyStem,  1 },
         };
 
+        startMonthUpgradeLevels = new Dictionary<PlantDefines.UpgradeOptions, int>
+        {
+            { PlantDefines.UpgradeOptions.AddLeaf,     1 },
+            { PlantDefines.UpgradeOptions.StrongBite,  1 },
+            { PlantDefines.UpgradeOptions.StrongScent, 1 },
+            { PlantDefines.UpgradeOptions.DeepRoot,    1 },
+            { PlantDefines.UpgradeOptions.SturdyStem,  1 },
+        };
+        StartMonthEnergy = data.CurrentEnergy;
+
         // 2. 세이브 데이터 로드 시도
         SaveData saved = Managers.Data.Load();
         if (saved != null)
@@ -47,6 +82,14 @@ public class PlantController : MonoBehaviour
             upgradeLevels[PlantDefines.UpgradeOptions.StrongScent] = Mathf.Max(1, saved.strongScentLevel);
             upgradeLevels[PlantDefines.UpgradeOptions.DeepRoot] = Mathf.Max(1, saved.deepRootLevel);
             upgradeLevels[PlantDefines.UpgradeOptions.SturdyStem] = Mathf.Max(1, saved.sturdyStemLevel);
+
+            // 월 시작 상태 복원
+            StartMonthEnergy = saved.startMonthEnergy;
+            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.AddLeaf] = Mathf.Max(1, saved.startMonthAddLeafLevel);
+            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.StrongBite] = Mathf.Max(1, saved.startMonthStrongBiteLevel);
+            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.StrongScent] = Mathf.Max(1, saved.startMonthStrongScentLevel);
+            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.DeepRoot] = Mathf.Max(1, saved.startMonthDeepRootLevel);
+            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.SturdyStem] = Mathf.Max(1, saved.startMonthSturdyStemLevel);
 
             // 트랩 복원: AddLeaf 레벨만큼 트랩 생성
             int trapCount = upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf];
@@ -180,5 +223,6 @@ public class PlantController : MonoBehaviour
     void HandleMonthChange(int newMonth)
     {
         // 월 변경 시 업그레이드 효과 예약 (추후 구현)
+        UpdateStartMonthState();
     }
 }

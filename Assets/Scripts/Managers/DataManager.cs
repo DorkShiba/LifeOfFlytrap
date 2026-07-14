@@ -32,6 +32,17 @@ public class DataManager
         data.deepRootLevel    = PlantController.GetLevel(PlantDefines.UpgradeOptions.DeepRoot);
         data.sturdyStemLevel  = PlantController.GetLevel(PlantDefines.UpgradeOptions.SturdyStem);
 
+        // 월 시작 상태 수집
+        if (PlantController.Instance != null)
+        {
+            data.startMonthEnergy = PlantController.Instance.StartMonthEnergy;
+            data.startMonthAddLeafLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.AddLeaf);
+            data.startMonthStrongBiteLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.StrongBite);
+            data.startMonthStrongScentLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.StrongScent);
+            data.startMonthDeepRootLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.DeepRoot);
+            data.startMonthSturdyStemLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.SturdyStem);
+        }
+
         string json = JsonUtility.ToJson(data, prettyPrint: true);
         File.WriteAllText(SavePath, json);
         Debug.Log($"[DataManager] 저장 완료 → {SavePath}");

@@ -21,7 +21,7 @@ public class TitleUI : BaseUI
     private Button upgradeToggleButton, menuToggleButton;
     public override void Init()
     {
-        Managers.UI.SetPopupCanvas(gameObject);
+        Managers.UI.SetSceneCanvas(gameObject, 0);
         Bind<TextMeshProUGUI>(typeof(TitleTexts));
         monthText = GetText(0);
         timeText = GetText(1);
@@ -51,32 +51,32 @@ public class TitleUI : BaseUI
         energyText.text = $"에너지: {energy}";
     }
 
-    UpgradeList upgradeListPopup;
+    UpgradeList upgradeList;
 
     public void OnUpgradeToggleButtonClicked()
     {
-        if (upgradeListPopup != null)
+        if (upgradeList != null)
         {
-            Managers.UI.ClosePopupUI(upgradeListPopup);
-            upgradeListPopup = null;
+            Managers.UI.DestroyUI(upgradeList);
+            upgradeList = null;
         }
         else
         {
-            upgradeListPopup = Managers.UI.ShowPopupUI<UpgradeList>("UpgradeList");
+            upgradeList = Managers.UI.InstantiateUI<UpgradeList>();
         }
     }
 
-    MenuList menuListPopup;
+    MenuList menuList;
     public void OnMenuToggleButtonClicked()
     {
-        if (menuListPopup != null)
+        if (menuList != null)
         {
-            Managers.UI.ClosePopupUI(menuListPopup);
-            menuListPopup = null;
+            Managers.UI.DestroyUI(menuList);
+            menuList = null;
         }
         else
         {
-            menuListPopup = Managers.UI.ShowPopupUI<MenuList>("MenuList");
+            menuList = Managers.UI.InstantiateUI<MenuList>();
         }
     }
 }

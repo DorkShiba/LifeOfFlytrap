@@ -8,13 +8,19 @@ enum MenuButtons
     LoadButton,
 }
 
-public class MenuList : Popup
+public class MenuList : BaseUI
 {
+    private bool _init = false;
+    void Start()
+    {
+        Init();
+    }
     private MenuButton saveButton, loadButton;
 
     public override void Init()
     {
-        base.Init();
+        if (_init) return;
+        _init = true;
         Bind<MenuButton>(typeof(MenuButtons));
         saveButton    = Get<MenuButton>(0);
         loadButton  = Get<MenuButton>(1);

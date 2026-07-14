@@ -10,11 +10,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5604491251759432171, guid: d7b5e27948471cd44ab7ea26b80c4b92, type: 3}
       propertyPath: m_Name
-      value: SaveButton Variant
+      value: SaveButton
       objectReference: {fileID: 0}
     - target: {fileID: 6614836961886465360, guid: d7b5e27948471cd44ab7ea26b80c4b92, type: 3}
       propertyPath: m_text
-      value: Save
+      value: "\uC800\uC7A5\uD558\uAE30"
       objectReference: {fileID: 0}
     - target: {fileID: 8064445278549452489, guid: d7b5e27948471cd44ab7ea26b80c4b92, type: 3}
       propertyPath: m_Pivot.x

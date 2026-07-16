@@ -17,10 +17,10 @@ public class SpawnManager
     private const float SPAWN_INTERVAL_MAX = 7f;   // 첫 스테이지 스폰 쿨타임(초)
     private const int MAX_BUGS_MIN = 10;    // 첫 스테이지 동시 최대 마리수
     private const int MAX_BUGS_MAX = 18;   // 마지막 스테이지 동시 최대 마리수
-    private const int TOTAL_MONTHS = 12;
+    private const int TOTAL_MONTHS = 8;
 
-    // 게임 시작 월 (3월 시작 → 2월 종료)
-    // 스테이지 인덱스(0~11) = (월 - START_MONTH + 12) % 12
+    // 게임 시작 월 (3월 시작 → 10월 종료)
+    // 스테이지 인덱스(0~7) = month - START_MONTH
     private const int START_MONTH = 3;
 
     // 맵 가장자리 스폰 시 트랩과의 최소 거리
@@ -29,6 +29,11 @@ public class SpawnManager
     private List<BugData> allBugData = new List<BugData>();
     private Coroutine spawnCoroutine;
     private int currentMonth = 1;
+
+    private bool _isFirstBugSpawned = false;
+    private bool _hasRandomBugSoundPlayed = false;
+    private int _spawnCountThisMonth = 0;
+    private int _randomBugSoundTargetIndex = 0;
 
     // ──────────────────────────────────────────────
     // 초기화
@@ -86,6 +91,12 @@ public class SpawnManager
     {
         if (spawnCoroutine != null)
             Managers.StopCoroutineManager(spawnCoroutine);
+
+        _isFirstBugSpawned = false;
+        _hasRandomBugSoundPlayed = false;
+        _spawnCountThisMonth = 0;
+        // 2번째~8번째 스폰 중 랜덤하게 한 번 더 소리 재생하도록 목표 인덱스 설정
+        _randomBugSoundTargetIndex = Random.Range(2, 8);
 
         spawnCoroutine = Managers.StartCoroutineManager(SpawnLoop);
     }
@@ -155,6 +166,18 @@ public class SpawnManager
             float halfW = GameData.Instance.MapWidth * 0.5f;
             float halfH = GameData.Instance.MapHeight * 0.5f;
             bc.Init(new Vector2(-halfW, -halfH), new Vector2(halfW, halfH));
+
+            _spawnCountThisMonth++;
+            if (!_isFirstBugSpawned)
+            {
+                Managers.Sound.PlaySFX("BugWings");
+                _isFirstBugSpawned = true;
+            }
+            else if (!_hasRandomBugSoundPlayed && _spawnCountThisMonth == _randomBugSoundTargetIndex)
+            {
+                Managers.Sound.PlaySFX("BugWings");
+                _hasRandomBugSoundPlayed = true;
+            }
         }
     }
 
@@ -180,12 +203,12 @@ public class SpawnManager
     }
 
     /// <summary>
-    /// 실제 월 번호(1~12)를 스테이지 인덱스(0~11)로 변환한다.
-    /// 게임은 3월(인덱스 0)에 시작해 2월(인덱스 11)에 끝난다.
+    /// 실제 월 번호(3~10)를 스테이지 인덱스(0~7)로 변환한다.
+    /// 게임은 3월(인덱스 0)에 시작해 10월(인덱스 7)에 끝난다.
     /// </summary>
     private int MonthToStageIndex(int month)
     {
-        return (month - START_MONTH + 12) % 12;
+        return month - START_MONTH;
     }
 
     /// <summary>

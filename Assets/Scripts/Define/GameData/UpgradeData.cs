@@ -24,6 +24,10 @@ public class UpgradeData : ScriptableObject
     [Tooltip("레벨 1부터 7까지의 착지 반경")]
     public List<float> LandingRadiusByLevel = new List<float>() { 0.3f, 0.35f, 0.4f, 0.45f, 0.5f, 0.55f, 0.6f };
 
+    [Header("에너지 자동 회복량 (Energy Regen By Level)")]
+    [Tooltip("레벨 1부터 7까지의 5초당 에너지 회복량")]
+    public List<int> EnergyRegenRateByLevel = new List<int>() { 0, 1, 2, 3, 4, 5, 6 };
+
     [Header("트랩 생성 좌표 (Max 7개)")]
     [Tooltip("트랩이 생성될 좌표 (순서대로 1번 트랩 ~ 7번 트랩)")]
     public List<Vector3> TrapPositions = new List<Vector3>()

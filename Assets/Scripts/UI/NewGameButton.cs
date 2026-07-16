@@ -5,7 +5,6 @@ public class NewGameButton : MenuButton
     protected override void OnClicked()
     {
         base.OnClicked();
-        Debug.Log("New Game Button Clicked");
 
         // 1. 기존 세이브 삭제 (새 게임은 무조건 초기 상태)
         Managers.Data.DeleteSave();

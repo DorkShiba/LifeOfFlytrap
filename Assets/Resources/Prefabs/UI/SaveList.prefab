@@ -423,9 +423,29 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1171439792191336714, guid: d3911ccbd0fbd0b45ac88da5c74d9d05, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 1171439792191336714, guid: d3911ccbd0fbd0b45ac88da5c74d9d05, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 60
+      objectReference: {fileID: 0}
     - target: {fileID: 1226950161672930460, guid: d3911ccbd0fbd0b45ac88da5c74d9d05, type: 3}
       propertyPath: m_Name
       value: SaveSlot1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6522225600388364763, guid: d3911ccbd0fbd0b45ac88da5c74d9d05, type: 3}
+      propertyPath: m_margin.z
+      value: -109.84473
+      objectReference: {fileID: 0}
+    - target: {fileID: 6522225600388364763, guid: d3911ccbd0fbd0b45ac88da5c74d9d05, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 6522225600388364763, guid: d3911ccbd0fbd0b45ac88da5c74d9d05, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

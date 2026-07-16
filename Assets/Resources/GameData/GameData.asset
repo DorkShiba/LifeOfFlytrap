@@ -12,3 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01fe0429c4d046842b159f881a101754, type: 3}
   m_Name: GameData
   m_EditorClassIdentifier: Assembly-CSharp::GameData
+  MapWidth: 22.5
+  MapHeight: 15
+  MonthDuration: 180
+  ClearConstraints: 0a0000000a0000000a0000000a0000000a0000000a0000000a0000000a0000000a0000000a0000000a0000000a000000

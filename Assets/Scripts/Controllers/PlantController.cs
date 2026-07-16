@@ -38,6 +38,36 @@ public class PlantController : MonoBehaviour
         }
     }
 
+    public void RestoreStartMonthState()
+    {
+        if (data != null)
+            data.CurrentEnergy = StartMonthEnergy;
+        
+        if (upgradeLevels != null && startMonthUpgradeLevels != null)
+        {
+            var keys = new System.Collections.Generic.List<PlantDefines.UpgradeOptions>(startMonthUpgradeLevels.Keys);
+            foreach (var key in keys)
+            {
+                upgradeLevels[key] = startMonthUpgradeLevels[key];
+            }
+        }
+
+        int trapCount = upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf];
+        while (traps.Count > trapCount)
+        {
+            var trap = traps[traps.Count - 1];
+            traps.RemoveAt(traps.Count - 1);
+            if (Managers.TrapLogic.traps.Contains(trap.gameObject))
+                Managers.TrapLogic.traps.Remove(trap.gameObject);
+            Destroy(trap.gameObject);
+        }
+
+        if (spriteRenderer != null && PlantDefines.PlantSprites.Count > 0)
+            spriteRenderer.sprite = PlantDefines.PlantSprites[Mathf.Clamp(traps.Count - 1, 0, PlantDefines.PlantSprites.Count - 1)];
+
+        Managers.Game.Title?.updateEnergy(data.CurrentEnergy);
+    }
+
     void Start()
     {
         _instance = this;
@@ -120,7 +150,23 @@ public class PlantController : MonoBehaviour
             spriteRenderer.sprite = PlantDefines.PlantSprites[Mathf.Clamp(traps.Count - 1, 0, PlantDefines.PlantSprites.Count - 1)];
     }
 
-    void Update() { }
+    private float regenTimer = 0f;
+    void Update() 
+    { 
+        if (Managers.Game.CurrentSession != null && Managers.Game.CurrentSession.IsFrozen) return;
+
+        regenTimer += Time.deltaTime;
+        if (regenTimer >= 5f)
+        {
+            regenTimer = 0f;
+            int regenAmount = PlantDefines.GetCurrentEnergyRegenRate();
+            if (regenAmount > 0 && data != null)
+            {
+                data.CurrentEnergy += regenAmount;
+                Managers.Game.Title?.updateEnergy(data.CurrentEnergy);
+            }
+        }
+    }
 
     // ─────────────────────────────────────────────
     // 업그레이드 API
@@ -190,7 +236,7 @@ public class PlantController : MonoBehaviour
                 // 향기(StrongScent) 업그레이드는 이제 PlantDefines.GetCurrentLandingChance() / Radius()를 통해 동적으로 레벨을 참조하므로 별도의 상태값 갱신이 불필요함
                 break;
             case PlantDefines.UpgradeOptions.DeepRoot:
-                data.EnergyRegenRate += 1;
+                // 에너지 회복량(EnergyRegenRate) 업그레이드는 이제 PlantDefines.GetCurrentEnergyRegenRate()를 통해 동적으로 레벨을 참조하므로 별도의 상태값 갱신이 불필요함
                 break;
             case PlantDefines.UpgradeOptions.SturdyStem:
                 // 잎이 다시 열리는 시간을 줄이는 효과는 TrapController에서 동적으로 레벨을 참조하여 적용합니다.

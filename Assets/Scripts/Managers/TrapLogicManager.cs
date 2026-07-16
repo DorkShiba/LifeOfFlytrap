@@ -23,6 +23,16 @@ public class TrapLogicManager
         bugs.RemoveAll(b => b == null);
     }
 
+    public void ClearBugsFromMap()
+    {
+        foreach (var bug in bugs)
+        {
+            if (bug != null)
+                GameObject.Destroy(bug);
+        }
+        bugs.Clear();
+    }
+
     public void Clear()
     {
         bugs.Clear();
@@ -79,16 +89,6 @@ public class TrapLogicManager
         {
             data.CurrentEnergy += bug.EnergyValue;
             Managers.Game.Title.updateEnergy(data.CurrentEnergy);
-
-            // 클리어 조건 달성 시 화면 프리즈 및 EndMonth 팝업 표시
-            int currentMonth = Managers.Game.CurrentSession?.CurrentMonth ?? 3;
-            int monthIndex = currentMonth - 1;
-            if (monthIndex >= 0 && monthIndex < GameData.Instance.ClearConstraints.Count
-                && data.CurrentEnergy >= GameData.Instance.ClearConstraints[monthIndex]
-                && (Managers.Game.CurrentSession != null && !Managers.Game.CurrentSession.IsFrozen))
-            {
-                Managers.Game.CurrentSession?.FreezeForEndMonth();
-            }
         }
 
         bug.Die();

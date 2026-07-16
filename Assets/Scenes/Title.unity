@@ -263,7 +263,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Plant
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 7800412920079470414, guid: 1bc971476db2d5546bc97c2681c07b26, type: 3}
+      propertyPath: trap
+      value: 
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 3754159249532110757, guid: 1bc971476db2d5546bc97c2681c07b26, type: 3}
+    - {fileID: 6532090339093886057, guid: 1bc971476db2d5546bc97c2681c07b26, type: 3}
+    - {fileID: 7800412920079470414, guid: 1bc971476db2d5546bc97c2681c07b26, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

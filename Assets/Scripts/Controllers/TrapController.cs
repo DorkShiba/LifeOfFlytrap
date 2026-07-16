@@ -128,6 +128,7 @@ public class TrapController : MonoBehaviour, ITrap
         // 클릭 위치가 센서 범위 내에 있는지 확인
         if (biteZoneCollider == null || !biteZoneCollider.OverlapPoint(mousePosition)) return;
 
+        Managers.Sound.PlaySFX("EatBug");
         if (!isSnapping)
         {
             // 에너지 확인 및 소모

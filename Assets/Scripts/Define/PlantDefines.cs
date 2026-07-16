@@ -53,6 +53,14 @@ public class PlantDefines
         return Data.LandingRadiusByLevel[level];
     }
 
+    public static int GetCurrentEnergyRegenRate()
+    {
+        int level = PlantController.GetLevel(UpgradeOptions.DeepRoot);
+        if (Data == null || Data.EnergyRegenRateByLevel.Count == 0) return 0;
+        level = Mathf.Clamp(level - 1, 0, Data.EnergyRegenRateByLevel.Count - 1);
+        return Data.EnergyRegenRateByLevel[level];
+    }
+
     public static float GetTrapReopenTimeMultiplier()
     {
         int level = PlantController.GetLevel(UpgradeOptions.SturdyStem);

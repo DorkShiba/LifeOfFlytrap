@@ -25,6 +25,7 @@ public class MenuButton : BaseUI
 
     protected virtual void OnClicked()
     {
+        Managers.Sound.PlaySFX("ButtonClick");
         // 자식 클래스에서 오버라이드하여 각 버튼의 기능을 구현합니다.
     }
 }

@@ -26,6 +26,8 @@ public class GameData : ScriptableObject
     public float MapWidth = 11.25f * 2;  // 맵의 가로 크기
     public float MapHeight = 7.5f * 2; // 맵의 세로
 
+    public float MonthDuration = 180f; // 한 달 지속 시간 (초)
+
     public List<int> ClearConstraints = new List<int>{
         1000, 1000, 1000,
         1000, 1000, 1000,

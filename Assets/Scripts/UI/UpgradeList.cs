@@ -51,10 +51,10 @@ public class UpgradeList : BaseUI
     /// 업그레이드 버튼 클릭 시 호출.
     /// PlantController에 업그레이드를 위임하고 모든 버튼 UI를 갱신합니다.
     /// </summary>
-    private void OnUpgradeClicked(PlantDefines.UpgradeOptions option)
+    private bool OnUpgradeClicked(PlantDefines.UpgradeOptions option)
     {
         PlantController plantCtrl = FindObjectOfType<PlantController>();
-        if (plantCtrl == null) return;
+        if (plantCtrl == null) return false;
 
         bool success = plantCtrl.TryUpgrade(option);
         if (success)
@@ -66,5 +66,7 @@ public class UpgradeList : BaseUI
             deeperRootButton .RefreshUI();
             sturdyStemButton .RefreshUI();
         }
+        
+        return success;
     }
 }

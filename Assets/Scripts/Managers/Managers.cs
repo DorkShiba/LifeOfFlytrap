@@ -22,7 +22,7 @@ public class Managers : MonoBehaviour {
     PoolManager _pool;
     ResourceManager _resource = new ResourceManager();
     SceneManager _scene = new SceneManager();
-    // SoundManager _sound = new SoundManager();
+    SoundManager _sound = new SoundManager();
     UIManager _ui = new UIManager();
     TrapLogicManager _trapLogic;
     GameManager _game;
@@ -34,7 +34,7 @@ public class Managers : MonoBehaviour {
     }
 
     void OnApplicationQuit() {
-        Managers.Data.Save();
+        // Managers.Data.Save(); // 게임 종료 시 자동 저장 기능 비활성화
         isQuitting = true;
     }
 
@@ -44,7 +44,7 @@ public class Managers : MonoBehaviour {
     public static PoolManager Pool { get { return isQuitting? null: Instance._pool; } }
     public static ResourceManager Resource { get { return isQuitting? null: Instance._resource; } }
     public static SceneManager Scene { get { return isQuitting? null: Instance._scene; } }
-    // public static SoundManager Sound { get { return Instance._sound; } }
+    public static SoundManager Sound { get { return Instance._sound; } }
     public static UIManager UI { get { return isQuitting? null: Instance._ui; } }
     public static TrapLogicManager TrapLogic { get { return isQuitting? null: Instance._trapLogic; } }
     public static GameManager Game { get { return isQuitting? null: Instance._game; } }
@@ -101,7 +101,7 @@ public class Managers : MonoBehaviour {
             _instance._scene.Init();
             // Pool.Init();
             // Options.Init();
-            // Sound.Init();
+            _instance._sound.Init();
 
             // Camera.Init();
         }
@@ -120,7 +120,7 @@ public class Managers : MonoBehaviour {
         Scene?.Clear();
         TrapLogic?.Clear();
         // Pool.Clear();
-        // Sound.Clear();
+        Sound?.Clear();
         // UI.Clear();
 
         // Combat.Clear();

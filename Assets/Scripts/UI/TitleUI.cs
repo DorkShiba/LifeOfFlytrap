@@ -34,9 +34,16 @@ public class TitleUI : BaseUI
         menuToggleButton.onClick.AddListener(OnMenuToggleButtonClicked);
     }
 
+    private int _currentMonth = 3;
+
     public void updateMonth(int month)
     {
+        _currentMonth = month;
         monthText.text = $"{month}월";
+        
+        // 월이 바뀌었을 때 목표 에너지 수치도 갱신되도록 다시 호출
+        if (PlantController.Data != null)
+            updateEnergy(PlantController.Data.CurrentEnergy);
     }
 
     public void updateTime(float time)
@@ -48,13 +55,21 @@ public class TitleUI : BaseUI
 
     public void updateEnergy(int energy)
     {
-        energyText.text = $"에너지: {energy}";
+        int requiredEnergy = 0;
+        int monthIndex = _currentMonth - 1;
+        if (GameData.Instance != null && monthIndex >= 0 && monthIndex < GameData.Instance.ClearConstraints.Count)
+        {
+            requiredEnergy = GameData.Instance.ClearConstraints[monthIndex];
+        }
+
+        energyText.text = $"에너지: {energy} / {requiredEnergy}";
     }
 
     UpgradeList upgradeList;
 
     public void OnUpgradeToggleButtonClicked()
     {
+        Managers.Sound.PlaySFX("ButtonClick");
         if (upgradeList != null)
         {
             Managers.UI.DestroyUI(upgradeList);
@@ -69,6 +84,7 @@ public class TitleUI : BaseUI
     MenuList menuList;
     public void OnMenuToggleButtonClicked()
     {
+        Managers.Sound.PlaySFX("ButtonClick");
         if (menuList != null)
         {
             Managers.UI.DestroyUI(menuList);

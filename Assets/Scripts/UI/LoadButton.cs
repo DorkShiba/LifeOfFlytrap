@@ -8,6 +8,7 @@ public class LoadButton : MenuButton
     private SaveList saveList;
     protected override void OnClicked()
     {
+        base.OnClicked();
         if (saveList != null) return;
         saveList = Managers.UI.ShowPopupUI<SaveList>();
     }

@@ -15,7 +15,7 @@ public class UpgradeButton : BaseUI
     private TextMeshProUGUI costText, upgradeChangeText;
     private Button button;
     private PlantDefines.UpgradeOptions option;
-    private Action<PlantDefines.UpgradeOptions> onClickCallback;
+    private Func<PlantDefines.UpgradeOptions, bool> onClickCallback;
 
     public override void Init()
     {
@@ -35,7 +35,7 @@ public class UpgradeButton : BaseUI
     /// </summary>
     /// <param name="upgradeOption">이 버튼이 담당하는 업그레이드</param>
     /// <param name="callback">클릭 시 실행할 콜백</param>
-    public void SetInfo(PlantDefines.UpgradeOptions upgradeOption, Action<PlantDefines.UpgradeOptions> callback)
+    public void SetInfo(PlantDefines.UpgradeOptions upgradeOption, Func<PlantDefines.UpgradeOptions, bool> callback)
     {
         option = upgradeOption;
         onClickCallback = callback;
@@ -57,9 +57,7 @@ public class UpgradeButton : BaseUI
         else
         {
             updateCost(costs[level]);
-            if (button != null)
-                button.interactable = PlantController.Data != null &&
-                                      PlantController.Data.CurrentEnergy >= costs[level];
+            // 버튼을 항상 클릭 가능하게 두어 실패음이 들리도록 수정 (interactable = false 제거)
         }
     }
 
@@ -75,7 +73,13 @@ public class UpgradeButton : BaseUI
 
     private void OnClicked()
     {
-        onClickCallback?.Invoke(option);
+        bool success = onClickCallback?.Invoke(option) ?? false;
+
+        if (success)
+            Managers.Sound.PlaySFX("Upgrade");
+        else
+            Managers.Sound.PlaySFX("ButtonClick");
+
         RefreshUI();
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GameSession
 {
-    private float MONTH_DURATION = 30f; // 3 minutes
+    private float MONTH_DURATION => GameData.Instance.MonthDuration;
     private float monthTimer = 0f;
 
     public bool IsFrozen { get; private set; } = false;
@@ -49,27 +49,54 @@ public class GameSession
             
         if (monthTimer >= MONTH_DURATION)
         {
-            monthTimer = 0f;
-            CurrentMonth++;
+            monthTimer = MONTH_DURATION;
+            int monthIndex = CurrentMonth - 1;
+            int requiredEnergy = 0;
+            if (monthIndex >= 0 && monthIndex < GameData.Instance.ClearConstraints.Count)
+            {
+                requiredEnergy = GameData.Instance.ClearConstraints[monthIndex];
+            }
             
-            if (title != null)
-                title.updateMonth(CurrentMonth);
-                
-            OnMonthChanged?.Invoke(CurrentMonth);
+            bool isClear = (PlantController.Data != null && PlantController.Data.CurrentEnergy >= requiredEnergy);
+            FreezeForEndMonth(isClear);
         }
     }
 
     /// <summary>
-    /// 클리어 조건 달성 시 호출. 게임을 멈추고 EndMonth 팝업을 띄운다.
+    /// 달(월)이 끝났을 때 호출. 게임을 멈추고 EndMonth 팝업을 띄운다.
     /// </summary>
-    public void FreezeForEndMonth()
+    public void FreezeForEndMonth(bool isClear)
     {
         if (IsFrozen) return;
         IsFrozen = true;
         Time.timeScale = 0f;
 
         EndMonth popup = Managers.UI.ShowPopupUI<EndMonth>("EndMonth");
-        popup.SetInfo(CurrentMonth + 1, AdvanceToNextMonth);
+        if (isClear)
+        {
+            if (CurrentMonth >= 10)
+                popup.SetInfo(true, 11, ReturnToTitle);
+            else
+                popup.SetInfo(true, CurrentMonth + 1, AdvanceToNextMonth);
+        }
+        else
+        {
+            popup.SetInfo(false, CurrentMonth, RetryMonth);
+        }
+    }
+
+    /// <summary>
+    /// 모든 달(10월)을 클리어했을 때 타이틀로 돌아가는 기능
+    /// </summary>
+    public void ReturnToTitle()
+    {
+        if (!IsFrozen) return;
+        IsFrozen = false;
+        Time.timeScale = 1f;
+
+        // 클리어 시 세이브 데이터를 지우고 타이틀로 돌아감
+        Managers.Data.DeleteSave();
+        Managers.Scene.LoadScene("Title");
     }
 
     /// <summary>
@@ -84,6 +111,8 @@ public class GameSession
         monthTimer = 0f;
         CurrentMonth++;
         
+        Managers.TrapLogic?.ClearBugsFromMap();
+        
         TitleUI title = Managers.Game.Title;
         if (title != null)
             title.updateMonth(CurrentMonth);
@@ -91,5 +120,40 @@ public class GameSession
         OnMonthChanged?.Invoke(CurrentMonth);
 
         Managers.Data.Save();
+    }
+
+    public void RetryMonth()
+    {
+        if (!IsFrozen) return;
+        IsFrozen = false;
+        Time.timeScale = 1f;
+
+        monthTimer = 0f;
+        
+        Managers.TrapLogic?.ClearBugsFromMap();
+
+        SaveData saved = Managers.Data.Load();
+        if (saved != null)
+        {
+            CurrentMonth = saved.currentMonth;
+        }
+        else
+        {
+            CurrentMonth = 3;
+        }
+
+        if (PlantController.Instance != null)
+        {
+            PlantController.Instance.RestoreStartMonthState();
+        }
+
+        TitleUI title = Managers.Game.Title;
+        if (title != null)
+        {
+            title.updateMonth(CurrentMonth);
+            title.updateTime(monthTimer);
+            if (PlantController.Data != null)
+                title.updateEnergy(PlantController.Data.CurrentEnergy);
+        }
     }
 }

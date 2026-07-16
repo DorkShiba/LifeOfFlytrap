@@ -25,7 +25,22 @@ public class Fly : BugController
         base.Awake();
         Managers.TrapLogic.AddBug(gameObject);
         if (data == null)
-            data = Managers.Resource.Load<FlyData>("GameData/FlyData");
+        {
+            string prefabName = gameObject.name.Replace("(Clone)", "");
+            data = Managers.Resource.Load<FlyData>($"GameData/{prefabName}Data");
+            
+            // 만약 해당 이름의 데이터가 없다면 에러 방지를 위해 기본 FlyData 로드
+            if (data == null)
+            {
+                Debug.LogWarning($"[Fly] GameData/{prefabName}Data 를 찾을 수 없어 기본 FlyData를 사용합니다.");
+                data = Managers.Resource.Load<FlyData>("GameData/FlyData");
+            }
+        }
+
+        if (data != null)
+        {
+            InitializeHP(data.HP);
+        }
     }
 
     public override void Init(Vector2 min, Vector2 max)

@@ -153,7 +153,7 @@ public class PlantController : MonoBehaviour
         ApplyUpgradeEffect(option);
         upgradeLevels[option]++;
 
-        Managers.Game.Title.updateEnergy(data.CurrentEnergy);
+        Managers.Game.Title?.updateEnergy(data.CurrentEnergy);
         Debug.Log($"[PlantController] {option} 업그레이드 → Lv{upgradeLevels[option]}");
         return true;
     }
@@ -193,7 +193,7 @@ public class PlantController : MonoBehaviour
                 data.EnergyRegenRate += 1;
                 break;
             case PlantDefines.UpgradeOptions.SturdyStem:
-                data.EnergyCostPerBite = Mathf.Max(0, data.EnergyCostPerBite - 1);
+                // 잎이 다시 열리는 시간을 줄이는 효과는 TrapController에서 동적으로 레벨을 참조하여 적용합니다.
                 break;
         }
     }

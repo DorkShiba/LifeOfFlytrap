@@ -53,6 +53,14 @@ public class PlantDefines
         return Data.LandingRadiusByLevel[level];
     }
 
+    public static float GetTrapReopenTimeMultiplier()
+    {
+        int level = PlantController.GetLevel(UpgradeOptions.SturdyStem);
+        // 레벨당 10%씩 열리는 시간 단축 (기본 1.0, 2레벨 0.9, ... 최소 0.2)
+        float multiplier = 1.0f - (level - 1) * 0.1f;
+        return Mathf.Clamp(multiplier, 0.2f, 1.0f);
+    }
+
     public static List<Sprite> PlantSprites = new List<Sprite>()
     {
         Resources.Load<Sprite>("Images/Plant/Body1"),

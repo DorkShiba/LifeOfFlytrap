@@ -23,14 +23,12 @@ public abstract class BugController : MonoBehaviour
 
     /// <summary>잡혔을 때 식물에 주는 에너지량. 하위 클래스에서 Data로부터 읽어온다.</summary>
     public abstract int EnergyValue { get; }
-    
+
     /// <summary>트랩에 잡혔을 때 소화에 걸리는 추가 시간. 하위 클래스에서 Data로부터 읽어온다.</summary>
     public abstract float DigestionTime { get; }
 
-    // (이전 TrapAttractionMultiplier 삭제됨)
-
     // HP 및 Freeze 상태
-    private int hp = 1;
+    [SerializeField] private int hp = 1;
     private bool isFrozen = false;
     protected Rigidbody2D rb;
 
@@ -120,6 +118,20 @@ public abstract class BugController : MonoBehaviour
     public void Unfreeze()
     {
         isFrozen = false;
+    }
+
+    /// <summary>트랩에 삼켜졌을 때 시각적으로 보이지 않게 처리한다.</summary>
+    public void Hide()
+    {
+        SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
+        foreach (var r in renderers) r.enabled = false;
+    }
+
+    /// <summary>트랩에서 탈출할 때 다시 시각적으로 보이게 처리한다.</summary>
+    public void Show()
+    {
+        SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
+        foreach (var r in renderers) r.enabled = true;
     }
 
     /// <summary>

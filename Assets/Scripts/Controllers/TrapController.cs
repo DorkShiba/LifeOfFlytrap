@@ -18,9 +18,7 @@ public class TrapController : MonoBehaviour, ITrap
     [SerializeField] private Collider2D biteZoneCollider;
 
     // 스냅 윈도우 최대 지속 시간 (하드 리밋)
-    [SerializeField] private float snapDuration = 0.5f;
-    // 연타 종료 판정: 마지막 클릭 후 이 시간 동안 입력 없으면 스냅 종료
-    [SerializeField] private float comboTimeout = 0.3f;
+    [SerializeField] private float snapDuration = 1.0f;
     // 트랩 닫힘 회복 시간
     [SerializeField] private float trapClosedDuration = 5.0f;
 
@@ -42,18 +40,21 @@ public class TrapController : MonoBehaviour, ITrap
         }
     }
     public float LandingRadius => PlantDefines.GetCurrentLandingRadius();
-    public bool IsAvailable => closeTime <= Util.EPS;
+    // 연타 중이거나 닫혀있으면 착륙 불가
+    public bool IsAvailable => closeTime <= Util.EPS && !isSnapping;
 
     private float closeTime = 0.0f;
+    private float digestTime = 0.0f;
     private bool isSnapping = false;
-    // 두 코루틴 중 먼저 발화하는 쪽이 스냅을 종료한다.
-    private Coroutine snapDurationCoroutine = null;  // 조건①: 500ms 하드 리밋
-    private Coroutine comboTimeoutCoroutine = null;  // 조건②: 연타 종료
+    private Coroutine snapDurationCoroutine = null;
 
     private float currentSnapMaxDigestionTime = 0f;
 
-    private const string TrapBiteStateName = "TrapBite";
+    // 실제로 갇힌 벌레들만 관리하는 리스트 (연타 중 들어온 벌레 타격 방지)
+    private List<BugController> trappedBugs = new List<BugController>();
+
     private static readonly int CloseTimeHash = Animator.StringToHash("closeTime");
+    private static readonly int DigestTimeHash = Animator.StringToHash("digestTime");
 
     void Awake()
     {
@@ -88,6 +89,12 @@ public class TrapController : MonoBehaviour, ITrap
         {
             closeTime -= Time.deltaTime;
             if (anim != null) anim.SetFloat(CloseTimeHash, closeTime);
+        }
+
+        if (digestTime > Util.EPS)
+        {
+            digestTime -= Time.deltaTime;
+            if (anim != null) anim.SetFloat(DigestTimeHash, digestTime);
         }
     }
 
@@ -126,22 +133,34 @@ public class TrapController : MonoBehaviour, ITrap
             // 에너지 확인 및 소모
             PlantData data = PlantController.Data;
             if (data == null || data.CurrentEnergy < data.EnergyCostPerBite) return;
-            data.CurrentEnergy -= data.EnergyCostPerBite;
-            Managers.Game.Title.updateEnergy(data.CurrentEnergy);
 
-            // 스냅 시작 — 하드 리밋 코루틴 (리셋 없음)
+            data.CurrentEnergy -= data.EnergyCostPerBite;
+            Managers.Game.Title?.updateEnergy(data.CurrentEnergy);
+
+            // 스냅 시작
             isSnapping = true;
             currentSnapMaxDigestionTime = 0f;
-            FreezeAllBiteBugs();
+
+            // 첫 터치 시 새로 추가된 digestTime 설정
+            digestTime = snapDuration;
+            if (anim != null)
+            {
+                anim.SetFloat(DigestTimeHash, digestTime);
+                anim.Play("TrapClose", 0, 0f); // 애니메이션 딜레이 없이 즉시 닫힘 상태 진입
+            }
+
+            // 가둘 벌레들을 확정 (이 시점에 범위 내에 있던 벌레들만 타겟으로 삼음)
+            trappedBugs.Clear();
+            trappedBugs.AddRange(OnBiteBugs);
+
+            FreezeAndHideAllBiteBugs();
             snapDurationCoroutine = StartCoroutine(SnapDurationRoutine());
         }
-
-        // 물기 애니메이션 재생 (매 클릭마다)
-        if (anim != null) anim.Play(TrapBiteStateName, 0, 0f);
-
-        // 조건② 연타 타이머 리셋 (클릭할 때마다 다시 시작)
-        if (comboTimeoutCoroutine != null) StopCoroutine(comboTimeoutCoroutine);
-        comboTimeoutCoroutine = StartCoroutine(ComboTimeoutRoutine());
+        else
+        {
+            // 연타 시 디버그 로그 출력
+            Debug.Log("터치");
+        }
 
         // 데미지 적용 (벌레가 없으면 건너뜀)
         ApplyBiteDamage();
@@ -149,7 +168,7 @@ public class TrapController : MonoBehaviour, ITrap
 
     private void ApplyBiteDamage()
     {
-        BugController[] bugsToBite = OnBiteBugs.ToArray();
+        BugController[] bugsToBite = trappedBugs.ToArray();
         foreach (var bug in bugsToBite)
         {
             if (bug == null) continue;
@@ -158,63 +177,65 @@ public class TrapController : MonoBehaviour, ITrap
             if (isDead)
             {
                 currentSnapMaxDigestionTime = Mathf.Max(currentSnapMaxDigestionTime, bug.DigestionTime);
+                trappedBugs.Remove(bug);
                 OnBiteBugs.Remove(bug);
                 onBugEaten?.Invoke(bug);
             }
         }
 
-        // 조건③: Bite Zone 내 벌레가 모두 사라졌으면 즉시 스냅 종료
-        if (isSnapping && OnBiteBugs.Count == 0)
+        // 갇힌 벌레가 모두 사라졌으면 즉시 스냅 종료
+        if (isSnapping && trappedBugs.Count == 0)
         {
             EndSnap();
         }
     }
 
-    // 조건①: 500ms 하드 리밋
+    // 제한 시간 내에 연타 가능
     private IEnumerator SnapDurationRoutine()
     {
         yield return new WaitForSeconds(snapDuration);
         EndSnap();
     }
 
-    // 조건②: 연타 종료 — 마지막 클릭 후 comboTimeout 초 경과 시 스냅 종료
-    private IEnumerator ComboTimeoutRoutine()
-    {
-        yield return new WaitForSeconds(comboTimeout);
-        EndSnap();
-    }
-
     /// <summary>
-    /// 세 조건 중 먼저 충족된 쪽이 호출. 중복 호출은 isSnapping 가드로 무시.
+    /// 조건이 충족되면 스냅을 종료. 중복 호출은 isSnapping 가드로 무시.
     /// </summary>
     private void EndSnap()
     {
         if (!isSnapping) return;
         isSnapping = false;
 
-        // 두 코루틴 모두 정리
+        // 코루틴 정리
         if (snapDurationCoroutine != null) { StopCoroutine(snapDurationCoroutine); snapDurationCoroutine = null; }
-        if (comboTimeoutCoroutine != null) { StopCoroutine(comboTimeoutCoroutine); comboTimeoutCoroutine = null; }
 
         // 살아남은 벌레 해동 후 탈출 처리
-        foreach (var bug in OnBiteBugs.ToArray())
+        foreach (var bug in trappedBugs.ToArray())
         {
             if (bug != null)
             {
                 bug.Unfreeze();
+                bug.Show();
                 OnBiteBugs.Remove(bug);
                 onBugEscaped?.Invoke(bug);
             }
         }
+        trappedBugs.Clear();
 
+        // 스냅이 끝났으므로 digestTime 초기화 후 실제 closeTime 설정
+        digestTime = 0f;
+        if (anim != null) anim.SetFloat(DigestTimeHash, digestTime);
         CloseAndRecover(currentSnapMaxDigestionTime);
     }
 
-    private void FreezeAllBiteBugs()
+    private void FreezeAndHideAllBiteBugs()
     {
         foreach (var bug in OnBiteBugs)
         {
-            if (bug != null) bug.Freeze();
+            if (bug != null)
+            {
+                bug.Freeze();
+                bug.Hide();
+            }
         }
     }
 
@@ -224,14 +245,17 @@ public class TrapController : MonoBehaviour, ITrap
     private void CancelSnap()
     {
         if (snapDurationCoroutine != null) { StopCoroutine(snapDurationCoroutine); snapDurationCoroutine = null; }
-        if (comboTimeoutCoroutine != null) { StopCoroutine(comboTimeoutCoroutine); comboTimeoutCoroutine = null; }
         isSnapping = false;
     }
 
     private void CloseAndRecover(float maxDigestionTime)
     {
-        // 먹은 벌레가 있다면 가장 긴 소화 시간을, 하나도 못 먹었다면 기본 닫힘 시간을 적용
-        closeTime = maxDigestionTime > 0f ? maxDigestionTime : trapClosedDuration;
+        // 기본 닫힘 시간(5초) + 먹은 벌레들 중 가장 긴 소화 시간
+        float baseCloseTime = trapClosedDuration + maxDigestionTime;
+
+        // 튼튼한 줄기 업그레이드 효과 적용: 잎이 다시 열리는 시간 단축 배율 곱하기
+        closeTime = baseCloseTime * PlantDefines.GetTrapReopenTimeMultiplier();
+
         if (anim != null) anim.SetFloat(CloseTimeHash, closeTime);
     }
 }

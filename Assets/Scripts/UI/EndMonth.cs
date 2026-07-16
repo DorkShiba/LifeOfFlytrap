@@ -1,31 +1,33 @@
+using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System;
 
-enum ClearText
+enum EndText
 {
-    MonthText,
+    EndingText,
 }
 
-enum ClearButtons
+enum EndButton
 {
-    NextMonthButton,
+    EndingButton,
 }
 
-public class EndMonth : Popup {
-    TextMeshProUGUI monthText;
-    Button nextMonthButton;
+public class EndMonth : Popup
+{
+    TextMeshProUGUI endingText;
+    Button endingButton;
     Action onNextMonth;
 
-    public override void Init() {
+    public override void Init()
+    {
         base.Init();
-        Bind<TextMeshProUGUI>(typeof(ClearText));
-        monthText = Get<TextMeshProUGUI>(0);
+        Bind<TextMeshProUGUI>(typeof(EndText));
+        endingText = Get<TextMeshProUGUI>(0);
 
-        Bind<Button>(typeof(ClearButtons));
-        nextMonthButton = Get<Button>(0);
-        nextMonthButton.onClick.AddListener(OnNextMonthClicked);
+        Bind<Button>(typeof(EndButton));
+        endingButton = Get<Button>(0);
+        endingButton.onClick.AddListener(OnEndingClicked);
     }
 
     /// <summary>
@@ -33,12 +35,14 @@ public class EndMonth : Popup {
     /// </summary>
     /// <param name="nextMonth">다음 달 번호</param>
     /// <param name="callback">버튼 클릭 시 실행할 콜백</param>
-    public void SetInfo(int nextMonth, Action callback) {
+    public void SetInfo(int nextMonth, Action callback)
+    {
         monthText.text = $"To month {nextMonth}";
         onNextMonth = callback;
     }
 
-    void OnNextMonthClicked() {
+    void OnNextMonthClicked()
+    {
         onNextMonth?.Invoke();
         Managers.UI.ClosePopupUI(this);
         Time.timeScale = 1f;

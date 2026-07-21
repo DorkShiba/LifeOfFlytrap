@@ -4,11 +4,11 @@ using TMPro;
 
 enum UpgradeButtons
 {
-    AddLeafButton,
-    StrongBiteButton,
-    StrongScentButton,
-    DeeperRootButton,
-    SturdyStemButton,
+    UpgradeButton_1,
+    UpgradeButton_2,
+    UpgradeButton_3,
+    UpgradeButton_4,
+    UpgradeButton_5,
 }
 
 public class UpgradeList : BaseUI

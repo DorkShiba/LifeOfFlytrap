@@ -63,7 +63,7 @@ public class GameSession
     }
 
     /// <summary>
-    /// 달(월)이 끝났을 때 호출. 게임을 멈추고 EndMonth 팝업을 띄운다.
+    /// 달(월)이 끝났을 때 호출. 클리어 시 ClearMonth 팝업을, 실패 시 Die 씬을 로드한다.
     /// </summary>
     public void FreezeForEndMonth(bool isClear)
     {
@@ -71,36 +71,36 @@ public class GameSession
         IsFrozen = true;
         Time.timeScale = 0f;
 
-        EndMonth popup = Managers.UI.ShowPopupUI<EndMonth>("EndMonth");
         if (isClear)
         {
+            ClearMonth popup = Managers.UI.ShowPopupUI<ClearMonth>("ClearMonth");
             if (CurrentMonth >= 10)
-                popup.SetInfo(true, 11, ReturnToTitle);
+                popup.SetInfo(11, LoadClearScene);
             else
-                popup.SetInfo(true, CurrentMonth + 1, AdvanceToNextMonth);
+                popup.SetInfo(CurrentMonth + 1, AdvanceToNextMonth);
         }
         else
         {
-            popup.SetInfo(false, CurrentMonth, RetryMonth);
+            Managers.Scene.LoadScene("Die");
         }
     }
 
     /// <summary>
-    /// 모든 달(10월)을 클리어했을 때 타이틀로 돌아가는 기능
+    /// 모든 달(10월)을 클리어했을 때 Clear 씬을 로드한다.
     /// </summary>
-    public void ReturnToTitle()
+    public void LoadClearScene()
     {
         if (!IsFrozen) return;
         IsFrozen = false;
         Time.timeScale = 1f;
 
-        // 클리어 시 세이브 데이터를 지우고 타이틀로 돌아감
+        // 클리어 시 세이브 데이터를 지우고 Clear 씬로 이동
         Managers.Data.DeleteSave();
-        Managers.Scene.LoadScene("Title");
+        Managers.Scene.LoadScene("Clear");
     }
 
     /// <summary>
-    /// EndMonth 팝업의 NextMonthButton 클릭 시 호출. 다음 달로 진행한다.
+    /// ClearMonth 팝업의 NextMonthButton 클릭 시 호출. 다음 달로 진행한다.
     /// </summary>
     public void AdvanceToNextMonth()
     {

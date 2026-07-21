@@ -65,19 +65,19 @@ public class TitleUI : BaseUI
         energyText.text = $"에너지: {energy} / {requiredEnergy}";
     }
 
-    UpgradeList upgradeList;
+    UpgradeTable upgradeTable;
 
     public void OnUpgradeToggleButtonClicked()
     {
         Managers.Sound.PlaySFX("ButtonClick");
-        if (upgradeList != null)
+        if (upgradeTable != null)
         {
-            Managers.UI.DestroyUI(upgradeList);
-            upgradeList = null;
+            Managers.UI.DestroyUI(upgradeTable);
+            upgradeTable = null;
         }
         else
         {
-            upgradeList = Managers.UI.InstantiateUI<UpgradeList>();
+            upgradeTable = Managers.UI.InstantiateUI<UpgradeTable>();
         }
     }
 

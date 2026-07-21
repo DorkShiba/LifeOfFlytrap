@@ -13,6 +13,7 @@ public class PlantDefines
         DeepRoot,
         SturdyStem,
     }
+    public static int MaxUpgradeLevel = UpgradeData.MAX_UPGRADE_LEVEL;
 
     private static UpgradeData _data;
     public static UpgradeData Data

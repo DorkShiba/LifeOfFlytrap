@@ -13,6 +13,8 @@ public class UpgradeCostEntry
 [CreateAssetMenu(fileName = "New Upgrade Data", menuName = "GameData/UpgradeData", order = 2)]
 public class UpgradeData : ScriptableObject
 {
+    public const int MAX_UPGRADE_LEVEL = 7;
+
     [Header("업그레이드 비용 (Max Level 7)")]
     public List<UpgradeCostEntry> UpgradeCosts = new List<UpgradeCostEntry>();
 

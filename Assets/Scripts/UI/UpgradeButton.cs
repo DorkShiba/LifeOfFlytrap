@@ -6,13 +6,13 @@ using UnityEngine.UI;
 enum InsideTexts
 {
     Cost,
-    UpgradeChange,
+    CurrentLevel,
 }
 
 public class UpgradeButton : BaseUI
 {
     private bool _init = false;
-    private TextMeshProUGUI costText, upgradeChangeText;
+    private TextMeshProUGUI costText, currentLevelText;
     private Button button;
     private PlantDefines.UpgradeOptions option;
     private Func<PlantDefines.UpgradeOptions, bool> onClickCallback;
@@ -23,7 +23,7 @@ public class UpgradeButton : BaseUI
         _init = true;
         Bind<TextMeshProUGUI>(typeof(InsideTexts));
         costText = Get<TextMeshProUGUI>(0);
-        upgradeChangeText = Get<TextMeshProUGUI>(1);
+        currentLevelText = Get<TextMeshProUGUI>(1);
 
         button = GetComponent<Button>();
         if (button != null)
@@ -48,27 +48,28 @@ public class UpgradeButton : BaseUI
         int level = PlantController.GetLevel(option);
         var costs = PlantDefines.GetUpgradeCosts(option);
 
-        if (level >= costs.Count)
+        if (level >= PlantDefines.MaxUpgradeLevel)
         {
-            costText.text = "MAX";
-            upgradeChangeText.text = "";
+            costText.text = "-";
+            currentLevelText.text = "MAX";
             if (button != null) button.interactable = false;
         }
         else
         {
             updateCost(costs[level]);
+            updateCurrentLevel(level);
             // 버튼을 항상 클릭 가능하게 두어 실패음이 들리도록 수정 (interactable = false 제거)
         }
     }
 
     public void updateCost(int cost)
     {
-        costText.text = $"소모에너지: {cost}";
+        costText.text = $"코스트: {cost}";
     }
 
-    public void updateUpgradeChange(int prev, int next)
+    public void updateCurrentLevel(int level)
     {
-        upgradeChangeText.text = $"레벨: {prev} -> {next}";
+        currentLevelText.text = $"현재 레벨 {level}";
     }
 
     private void OnClicked()

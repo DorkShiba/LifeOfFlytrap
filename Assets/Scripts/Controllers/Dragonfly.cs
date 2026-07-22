@@ -91,7 +91,7 @@ public class DragonFly : BugController
     Vector2 SelectDirection()
     {
         // 일정 확률로 가장 가까운 트랩을 조준
-        float chance = GameDefines.GetCurrentLandingChance();
+        float chance = GameDefines.GetCurrentLandingChance(BaseApproachChancePercent);
         if (Random.Range(0f, 100f) < chance)
         {
             ITrap trap = SelectTrap();

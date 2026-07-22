@@ -1,4 +1,4 @@
 Assets/Resources/Fonts/NeoDunggeunmoPro-Regular[[:space:]]SDF.asset filter=lfs diff=lfs merge=lfs -text
 
-# C# ÆÄÀÏ UTF-8 ÀÎÄÚµù °­Á¦
+# C# ìŠ¤í¬ë¦½íŠ¸ëŠ” UTF-8 ì¸ì½”ë”©ì„ í•˜ë„ë¡ ê°•ì œ
 *.cs text eol=crlf encoding=utf-8

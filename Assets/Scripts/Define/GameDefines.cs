@@ -38,12 +38,16 @@ public class GameDefines
         return Data != null ? Data.GetCosts(option) : new List<int>();
     }
 
-    public static float GetCurrentLandingChance()
+    /// <summary>
+    /// 벌레의 BaseApproachChancePercent를 기반으로 StrongScent 보너스를 적용한 최종 접근 확률을 반환합니다.
+    /// </summary>
+    public static float GetCurrentLandingChance(float baseChance)
     {
         int level = PlantController.GetLevel(UpgradeOptions.StrongScent);
-        if (Data == null || Data.LandingChanceByLevel.Count == 0) return 30f;
-        level = Mathf.Clamp(level, 0, Data.LandingChanceByLevel.Count - 1);
-        return Data.LandingChanceByLevel[level];
+        if (Data == null || Data.LandingChanceBonusByLevel.Count == 0) return baseChance;
+        level = Mathf.Clamp(level, 0, Data.LandingChanceBonusByLevel.Count - 1);
+        float bonus = Data.LandingChanceBonusByLevel[level]; // [0] = 더미, [1]~[7] = 레벨별 증가량
+        return baseChance * (1f + bonus * 0.1f);   // 예) baseChance=20, bonus=8 → 20 * 1.8 = 36%
     }
 
     public static float GetCurrentLandingRadius()
@@ -51,23 +55,23 @@ public class GameDefines
         int level = PlantController.GetLevel(UpgradeOptions.StrongScent);
         if (Data == null || Data.LandingRadiusByLevel.Count == 0) return 0.3f;
         level = Mathf.Clamp(level, 0, Data.LandingRadiusByLevel.Count - 1);
-        return Data.LandingRadiusByLevel[level];
+        return Data.LandingRadiusByLevel[level]; // [0] = 더미, [1]~[7] = 레벨별 값
     }
 
     public static int GetCurrentEnergyRegenRate()
     {
         int level = PlantController.GetLevel(UpgradeOptions.DeepRoot);
         if (Data == null || Data.EnergyRegenRateByLevel.Count == 0) return 0;
-        level = Mathf.Clamp(level - 1, 0, Data.EnergyRegenRateByLevel.Count - 1);
-        return Data.EnergyRegenRateByLevel[level];
+        level = Mathf.Clamp(level, 0, Data.EnergyRegenRateByLevel.Count - 1);
+        return Data.EnergyRegenRateByLevel[level]; // [0] = 더미, [1]~[7] = 레벨별 값
     }
 
     public static float GetTrapReopenTimeMultiplier()
     {
         int level = PlantController.GetLevel(UpgradeOptions.SturdyStem);
-        // 레벨에 비례해 트랩이 다시 열리는 시간 감소 (기본 1.0, 2레벨 0.9, ... 최소 0.2)
-        float multiplier = 1.0f - (level - 1) * 0.1f;
-        return Mathf.Clamp(multiplier, 0.2f, 1.0f);
+        if (Data == null || Data.TrapReopenTimeMultiplierByLevel.Count == 0) return 1.0f;
+        level = Mathf.Clamp(level, 0, Data.TrapReopenTimeMultiplierByLevel.Count - 1);
+        return Data.TrapReopenTimeMultiplierByLevel[level]; // [0] = 더미, [1]~[7] = 레벨별 값
     }
 
     public static Sprite GetCurrentPlantSprites(int AddLeafLevel)

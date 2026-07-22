@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,9 +18,9 @@ public class UpgradeData : ScriptableObject
     [Header("업그레이드 비용 (Max Level 7)")]
     public List<UpgradeCostEntry> UpgradeCosts;
 
-    [Header("착지 확률 (Landing Chance % By Level)")]
-    [Tooltip("레벨 1부터 7까지의 착지 확률")]
-    public List<float> LandingChanceByLevel;
+    [Header("착지 확률 증가량 (Landing Chance Bonus By Level)")]
+    [Tooltip("레벨별 착지 확률 증가량. 값 N → 기본 착지 확률 * (1 + N * 0.1). 예) N=8 → 기본 20% * 1.8 = 36%. [0]은 더미값.")]
+    public List<float> LandingChanceBonusByLevel;
 
     [Header("착지 반경 (Landing Radius By Level)")]
     [Tooltip("레벨 1부터 7까지의 착지 반경")]
@@ -29,6 +29,10 @@ public class UpgradeData : ScriptableObject
     [Header("에너지 회복량 (Energy Regen By Level)")]
     [Tooltip("레벨 1부터 7까지 5초당 에너지 회복량")]
     public List<int> EnergyRegenRateByLevel;
+
+    [Header("트랩 재개방 시간 배율 (Trap Reopen Time Multiplier)")]
+    [Tooltip("레벨별 트랩 소화 시간 배율. 값 0.9 → 기본 소화 시간의 90%. [0]은 더미값.")]
+    public List<float> TrapReopenTimeMultiplierByLevel;
 
     [Header("트랩 위치 표 (Max 7개)")]
     [Tooltip("트랩의 위치표 (레벨1의 첫번째 ~ 7번째의 위치)")]

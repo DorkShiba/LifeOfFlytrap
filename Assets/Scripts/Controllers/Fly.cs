@@ -100,7 +100,7 @@ public class Fly : BugController
         if (checkTimer <= 0f)
         {
             checkTimer = approachCheckInterval;
-            float chance = GameDefines.GetCurrentLandingChance();
+            float chance = GameDefines.GetCurrentLandingChance(BaseApproachChancePercent);
             if (Random.Range(0f, 100f) < chance)
             {
                 ITrap trap = SelectTrap();

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: PlantData
   m_EditorClassIdentifier: Assembly-CSharp::PlantData
   biteDamage: 1
-  currentEnergy: 500
+  currentEnergy: 0
   energyRegenRate: 0
   energyCostPerBite: 3

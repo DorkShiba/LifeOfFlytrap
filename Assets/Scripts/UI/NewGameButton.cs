@@ -10,7 +10,7 @@ public class NewGameButton : MenuButton
         Managers.Data.DeleteSave();
 
         // 2. 씬 로딩을 먼저 요청하고, 씬 로딩이 완료되면 게임을 시작합니다.
-        Managers.Scene.LoadScene("Main", () => 
+        Managers.Scene.LoadScene("Main", () =>
         {
             Managers.Game.StartGame();
         });

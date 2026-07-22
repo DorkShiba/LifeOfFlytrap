@@ -78,7 +78,7 @@ public class GameSession
         }
         else
         {
-            Managers.Scene.LoadScene("Die");
+            Managers.Scene.FadeAndLoadScene("Die", 1f);
         }
     }
 

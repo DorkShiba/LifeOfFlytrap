@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlantDefines
+public class GameDefines
 {
     public enum UpgradeOptions
     {
@@ -22,11 +22,11 @@ public class PlantDefines
         {
             if (_data == null)
             {
-                // Resources/GameData/UpgradeData.asset 으로 저장한다고 가정
+                // Resources/GameData/UpgradeData.asset 으로 로드 시도
                 _data = Resources.Load<UpgradeData>("GameData/UpgradeData");
                 if (_data == null)
                 {
-                    Debug.LogError("UpgradeData 에셋을 Resources/GameData/ 폴더에서 찾을 수 없습니다!");
+                    Debug.LogError("UpgradeData 에셋을 Resources/GameData/ 폴더에서 찾을 수 없습니다.");
                 }
             }
             return _data;
@@ -65,19 +65,23 @@ public class PlantDefines
     public static float GetTrapReopenTimeMultiplier()
     {
         int level = PlantController.GetLevel(UpgradeOptions.SturdyStem);
-        // 레벨당 10%씩 열리는 시간 단축 (기본 1.0, 2레벨 0.9, ... 최소 0.2)
+        // 레벨에 비례해 트랩이 다시 열리는 시간 감소 (기본 1.0, 2레벨 0.9, ... 최소 0.2)
         float multiplier = 1.0f - (level - 1) * 0.1f;
         return Mathf.Clamp(multiplier, 0.2f, 1.0f);
     }
 
-    public static List<Sprite> PlantSprites = new List<Sprite>()
+    public static Sprite GetCurrentPlantSprites(int AddLeafLevel)
     {
-        Resources.Load<Sprite>("Images/Plant/Body1"),
-        Resources.Load<Sprite>("Images/Plant/Body2"),
-        Resources.Load<Sprite>("Images/Plant/Body3"),
-        Resources.Load<Sprite>("Images/Plant/Body4"),
-        Resources.Load<Sprite>("Images/Plant/Body5"),
-        Resources.Load<Sprite>("Images/Plant/Body6"),
-        Resources.Load<Sprite>("Images/Plant/Body7"),
-    };
+        if (Data == null || Data.PlantSprites == null || Data.PlantSprites.Count == 0) return null;
+        int index = Mathf.Clamp(AddLeafLevel, 0, Data.PlantSprites.Count - 1);
+        return Data.PlantSprites[index];
+    }
+
+    /// <summary>해당 달의 목표 에너지를 반환합니다.</summary>
+    public static int GetRequiredEnergy(int month)
+    {
+        var constraints = GameData.Instance?.ClearConstraints;
+        if (constraints == null || month < 0 || month >= constraints.Count) return 0;
+        return constraints[month];
+    }
 }

@@ -27,11 +27,8 @@ public class GameData : ScriptableObject
     public float MapHeight = 7.5f * 2; // 맵의 세로
 
     public float MonthDuration = 180f; // 한 달 지속 시간 (초)
+    public int MIN_MONTH = 3;
+    public int MAX_MONTH = 10;
 
-    public List<int> ClearConstraints = new List<int>{
-        1000, 1000, 1000,
-        1000, 1000, 1000,
-        1000, 1000, 1000,
-        1000, 1000, 1000
-    };
+    public List<int> ClearConstraints;
 }

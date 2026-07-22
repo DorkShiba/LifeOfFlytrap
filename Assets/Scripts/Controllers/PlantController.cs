@@ -12,13 +12,13 @@ public class PlantController : MonoBehaviour
     [SerializeField] SpriteRenderer spriteRenderer;
 
     /// <summary>각 업그레이드의 현재 구매 횟수 (0 = 미구매)</summary>
-    private Dictionary<PlantDefines.UpgradeOptions, int> upgradeLevels;
+    private Dictionary<GameDefines.UpgradeOptions, int> upgradeLevels;
 
     // 월 시작 시점의 에너지와 업그레이드 레벨
     public int StartMonthEnergy { get; private set; }
-    private Dictionary<PlantDefines.UpgradeOptions, int> startMonthUpgradeLevels;
+    private Dictionary<GameDefines.UpgradeOptions, int> startMonthUpgradeLevels;
 
-    public int GetStartMonthLevel(PlantDefines.UpgradeOptions option)
+    public int GetStartMonthLevel(GameDefines.UpgradeOptions option)
     {
         if (startMonthUpgradeLevels == null) return 1;
         return startMonthUpgradeLevels.TryGetValue(option, out int level) ? level : 1;
@@ -28,7 +28,7 @@ public class PlantController : MonoBehaviour
     {
         if (data != null)
             StartMonthEnergy = data.CurrentEnergy;
-        
+
         if (upgradeLevels != null)
         {
             foreach (var kvp in upgradeLevels)
@@ -42,17 +42,17 @@ public class PlantController : MonoBehaviour
     {
         if (data != null)
             data.CurrentEnergy = StartMonthEnergy;
-        
+
         if (upgradeLevels != null && startMonthUpgradeLevels != null)
         {
-            var keys = new System.Collections.Generic.List<PlantDefines.UpgradeOptions>(startMonthUpgradeLevels.Keys);
+            var keys = new System.Collections.Generic.List<GameDefines.UpgradeOptions>(startMonthUpgradeLevels.Keys);
             foreach (var key in keys)
             {
                 upgradeLevels[key] = startMonthUpgradeLevels[key];
             }
         }
 
-        int trapCount = upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf];
+        int trapCount = upgradeLevels[GameDefines.UpgradeOptions.AddLeaf];
         while (traps.Count > trapCount)
         {
             var trap = traps[traps.Count - 1];
@@ -62,8 +62,8 @@ public class PlantController : MonoBehaviour
             Destroy(trap.gameObject);
         }
 
-        if (spriteRenderer != null && PlantDefines.PlantSprites.Count > 0)
-            spriteRenderer.sprite = PlantDefines.PlantSprites[Mathf.Clamp(traps.Count - 1, 0, PlantDefines.PlantSprites.Count - 1)];
+        if (spriteRenderer != null)
+            spriteRenderer.sprite = GameDefines.GetCurrentPlantSprites(GetLevel(GameDefines.UpgradeOptions.AddLeaf));
 
         Managers.Game.Title?.updateEnergy(data.CurrentEnergy);
     }
@@ -71,28 +71,28 @@ public class PlantController : MonoBehaviour
     void Start()
     {
         _instance = this;
-        
+
         // 1. 에셋 원본이 오염되지 않도록 원본을 불러와서 복제(Clone)하여 런타임용으로 사용합니다.
         PlantData originalData = Managers.Resource.Load<PlantData>("GameData/PlantData");
         data = Instantiate(originalData);
 
         // 업그레이드 단계 초기화 (기본값 레벨 1)
-        upgradeLevels = new Dictionary<PlantDefines.UpgradeOptions, int>
+        upgradeLevels = new Dictionary<GameDefines.UpgradeOptions, int>
         {
-            { PlantDefines.UpgradeOptions.AddLeaf,     1 },
-            { PlantDefines.UpgradeOptions.StrongBite,  1 },
-            { PlantDefines.UpgradeOptions.StrongScent, 1 },
-            { PlantDefines.UpgradeOptions.DeepRoot,    1 },
-            { PlantDefines.UpgradeOptions.SturdyStem,  1 },
+            { GameDefines.UpgradeOptions.AddLeaf,     1 },
+            { GameDefines.UpgradeOptions.StrongBite,  1 },
+            { GameDefines.UpgradeOptions.StrongScent, 1 },
+            { GameDefines.UpgradeOptions.DeepRoot,    1 },
+            { GameDefines.UpgradeOptions.SturdyStem,  1 },
         };
 
-        startMonthUpgradeLevels = new Dictionary<PlantDefines.UpgradeOptions, int>
+        startMonthUpgradeLevels = new Dictionary<GameDefines.UpgradeOptions, int>
         {
-            { PlantDefines.UpgradeOptions.AddLeaf,     1 },
-            { PlantDefines.UpgradeOptions.StrongBite,  1 },
-            { PlantDefines.UpgradeOptions.StrongScent, 1 },
-            { PlantDefines.UpgradeOptions.DeepRoot,    1 },
-            { PlantDefines.UpgradeOptions.SturdyStem,  1 },
+            { GameDefines.UpgradeOptions.AddLeaf,     1 },
+            { GameDefines.UpgradeOptions.StrongBite,  1 },
+            { GameDefines.UpgradeOptions.StrongScent, 1 },
+            { GameDefines.UpgradeOptions.DeepRoot,    1 },
+            { GameDefines.UpgradeOptions.SturdyStem,  1 },
         };
         StartMonthEnergy = data.CurrentEnergy;
 
@@ -107,34 +107,34 @@ public class PlantController : MonoBehaviour
             data.EnergyCostPerBite = saved.energyCostPerBite;
 
             // 하위 호환을 위해 세이브 값이 0이면 1로 보정
-            upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf] = Mathf.Max(1, saved.addLeafLevel);
-            upgradeLevels[PlantDefines.UpgradeOptions.StrongBite] = Mathf.Max(1, saved.strongBiteLevel);
-            upgradeLevels[PlantDefines.UpgradeOptions.StrongScent] = Mathf.Max(1, saved.strongScentLevel);
-            upgradeLevels[PlantDefines.UpgradeOptions.DeepRoot] = Mathf.Max(1, saved.deepRootLevel);
-            upgradeLevels[PlantDefines.UpgradeOptions.SturdyStem] = Mathf.Max(1, saved.sturdyStemLevel);
+            upgradeLevels[GameDefines.UpgradeOptions.AddLeaf] = Mathf.Max(1, saved.addLeafLevel);
+            upgradeLevels[GameDefines.UpgradeOptions.StrongBite] = Mathf.Max(1, saved.strongBiteLevel);
+            upgradeLevels[GameDefines.UpgradeOptions.StrongScent] = Mathf.Max(1, saved.strongScentLevel);
+            upgradeLevels[GameDefines.UpgradeOptions.DeepRoot] = Mathf.Max(1, saved.deepRootLevel);
+            upgradeLevels[GameDefines.UpgradeOptions.SturdyStem] = Mathf.Max(1, saved.sturdyStemLevel);
 
             // 월 시작 상태 복원
             StartMonthEnergy = saved.startMonthEnergy;
-            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.AddLeaf] = Mathf.Max(1, saved.startMonthAddLeafLevel);
-            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.StrongBite] = Mathf.Max(1, saved.startMonthStrongBiteLevel);
-            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.StrongScent] = Mathf.Max(1, saved.startMonthStrongScentLevel);
-            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.DeepRoot] = Mathf.Max(1, saved.startMonthDeepRootLevel);
-            startMonthUpgradeLevels[PlantDefines.UpgradeOptions.SturdyStem] = Mathf.Max(1, saved.startMonthSturdyStemLevel);
+            startMonthUpgradeLevels[GameDefines.UpgradeOptions.AddLeaf] = Mathf.Max(1, saved.startMonthAddLeafLevel);
+            startMonthUpgradeLevels[GameDefines.UpgradeOptions.StrongBite] = Mathf.Max(1, saved.startMonthStrongBiteLevel);
+            startMonthUpgradeLevels[GameDefines.UpgradeOptions.StrongScent] = Mathf.Max(1, saved.startMonthStrongScentLevel);
+            startMonthUpgradeLevels[GameDefines.UpgradeOptions.DeepRoot] = Mathf.Max(1, saved.startMonthDeepRootLevel);
+            startMonthUpgradeLevels[GameDefines.UpgradeOptions.SturdyStem] = Mathf.Max(1, saved.startMonthSturdyStemLevel);
 
-            // 트랩 복원: AddLeaf 레벨만큼 트랩 생성
-            int trapCount = upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf];
+            // 업그레이드 복원: AddLeaf 레벨만큼 업그레이드 생성
+            int trapCount = upgradeLevels[GameDefines.UpgradeOptions.AddLeaf];
             for (int i = 0; i < trapCount; i++)
                 CreateTraps();
         }
         else
         {
-            // 세이브가 없으면 위에서 복제해둔 원본(ScriptableObject)의 수치를 그대로 사용
-            int trapCount = upgradeLevels[PlantDefines.UpgradeOptions.AddLeaf];
+            // 세이브가 없을 경우, 에셋에 복제해둔 원본(ScriptableObject)의 수치 사용
+            int trapCount = upgradeLevels[GameDefines.UpgradeOptions.AddLeaf];
             for (int i = 0; i < trapCount; i++)
                 CreateTraps();
         }
 
-        // 초기화 및 세이브 복원이 끝난 직후, 로드된 에너지 값을 UI에 반영합니다.
+        // 초기화 후, 로드된 에너지 값을 UI에 반영
         if (Managers.Game.Title != null)
         {
             Managers.Game.Title.updateEnergy(data.CurrentEnergy);
@@ -146,20 +146,20 @@ public class PlantController : MonoBehaviour
             Managers.Game.CurrentSession.OnMonthChanged += HandleMonthChange;
         }
 
-        if (spriteRenderer != null && PlantDefines.PlantSprites.Count > 0)
-            spriteRenderer.sprite = PlantDefines.PlantSprites[Mathf.Clamp(traps.Count - 1, 0, PlantDefines.PlantSprites.Count - 1)];
+        if (spriteRenderer != null)
+            spriteRenderer.sprite = GameDefines.GetCurrentPlantSprites(GetLevel(GameDefines.UpgradeOptions.AddLeaf));
     }
 
     private float regenTimer = 0f;
-    void Update() 
-    { 
+    void Update()
+    {
         if (Managers.Game.CurrentSession != null && Managers.Game.CurrentSession.IsFrozen) return;
 
         regenTimer += Time.deltaTime;
         if (regenTimer >= 5f)
         {
             regenTimer = 0f;
-            int regenAmount = PlantDefines.GetCurrentEnergyRegenRate();
+            int regenAmount = GameDefines.GetCurrentEnergyRegenRate();
             if (regenAmount > 0 && data != null)
             {
                 data.CurrentEnergy += regenAmount;
@@ -168,19 +168,15 @@ public class PlantController : MonoBehaviour
         }
     }
 
-    // ─────────────────────────────────────────────
-    // 업그레이드 API
-    // ─────────────────────────────────────────────
-
     /// <summary>
-    /// 업그레이드를 시도합니다.
-    /// 에너지가 충분하고 최대 레벨이 아닐 때만 성공합니다.
+    /// 업그레이드 시도
+    /// 에너지가 충분하고 최대 레벨이 아닐 때만 성공
     /// </summary>
     /// <returns>업그레이드 성공 여부</returns>
-    public bool TryUpgrade(PlantDefines.UpgradeOptions option)
+    public bool TryUpgrade(GameDefines.UpgradeOptions option)
     {
         int currentLevel = upgradeLevels[option];
-        var costs = PlantDefines.GetUpgradeCosts(option);
+        var costs = GameDefines.GetUpgradeCosts(option);
 
         if (currentLevel >= costs.Count)
         {
@@ -191,7 +187,7 @@ public class PlantController : MonoBehaviour
         int cost = costs[currentLevel];
         if (data.CurrentEnergy < cost)
         {
-            Debug.Log($"[PlantController] 에너지 부족 ({data.CurrentEnergy} / {cost})");
+            Debug.Log($"[PlantController] 에너지 부족({data.CurrentEnergy} / {cost})");
             return false;
         }
 
@@ -205,41 +201,37 @@ public class PlantController : MonoBehaviour
     }
 
     /// <summary>특정 업그레이드의 현재 레벨을 반환합니다.</summary>
-    public static int GetLevel(PlantDefines.UpgradeOptions option)
+    public static int GetLevel(GameDefines.UpgradeOptions option)
     {
         if (_instance == null) return 0;
         return _instance.upgradeLevels.TryGetValue(option, out int level) ? level : 0;
     }
 
     /// <summary>특정 업그레이드가 최대 레벨인지 확인합니다.</summary>
-    public static bool IsMaxLevel(PlantDefines.UpgradeOptions option)
+    public static bool IsMaxLevel(GameDefines.UpgradeOptions option)
     {
         int level = GetLevel(option);
-        return level >= PlantDefines.GetUpgradeCosts(option).Count;
+        return level >= GameDefines.GetUpgradeCosts(option).Count;
     }
 
-    // ─────────────────────────────────────────────
-    // 내부 로직
-    // ─────────────────────────────────────────────
-
-    private void ApplyUpgradeEffect(PlantDefines.UpgradeOptions option)
+    private void ApplyUpgradeEffect(GameDefines.UpgradeOptions option)
     {
         switch (option)
         {
-            case PlantDefines.UpgradeOptions.AddLeaf:
+            case GameDefines.UpgradeOptions.AddLeaf:
                 CreateTraps();
                 break;
-            case PlantDefines.UpgradeOptions.StrongBite:
+            case GameDefines.UpgradeOptions.StrongBite:
                 data.BiteDamage += 1;
                 break;
-            case PlantDefines.UpgradeOptions.StrongScent:
-                // 향기(StrongScent) 업그레이드는 이제 PlantDefines.GetCurrentLandingChance() / Radius()를 통해 동적으로 레벨을 참조하므로 별도의 상태값 갱신이 불필요함
+            case GameDefines.UpgradeOptions.StrongScent:
+                // 향기(StrongScent) 업그레이드는 이제 GameDefines.GetCurrentLandingChance() / Radius()를 통해 동적으로 레벨을 참조하므로 별도의 상태값 갱신이 불필요함
                 break;
-            case PlantDefines.UpgradeOptions.DeepRoot:
-                // 에너지 회복량(EnergyRegenRate) 업그레이드는 이제 PlantDefines.GetCurrentEnergyRegenRate()를 통해 동적으로 레벨을 참조하므로 별도의 상태값 갱신이 불필요함
+            case GameDefines.UpgradeOptions.DeepRoot:
+                // 에너지 회복량(EnergyRegenRate) 업그레이드는 이제 GameDefines.GetCurrentEnergyRegenRate()를 통해 동적으로 레벨을 참조하므로 별도의 상태값 갱신이 불필요함
                 break;
-            case PlantDefines.UpgradeOptions.SturdyStem:
-                // 잎이 다시 열리는 시간을 줄이는 효과는 TrapController에서 동적으로 레벨을 참조하여 적용합니다.
+            case GameDefines.UpgradeOptions.SturdyStem:
+                // 잎이 다시 열리는 시간을 줄이는 효과는 TrapController에서 동적으로 레벨을 참조하여 적용합니다.           
                 break;
         }
     }
@@ -247,9 +239,9 @@ public class PlantController : MonoBehaviour
     public void CreateTraps()
     {
         Vector3 trapPosition = Vector3.zero;
-        if (PlantDefines.Data != null && traps.Count < PlantDefines.Data.TrapPositions.Count)
+        if (GameDefines.Data != null && traps.Count < GameDefines.Data.TrapPositions.Count)
         {
-            trapPosition = PlantDefines.Data.TrapPositions[traps.Count];
+            trapPosition = GameDefines.Data.TrapPositions[traps.Count];
         }
         else
         {
@@ -258,8 +250,8 @@ public class PlantController : MonoBehaviour
         }
 
         GameObject trap = Managers.Resource.Instantiate("Plant/Trap", transform, trapPosition);
-        if (spriteRenderer != null && PlantDefines.PlantSprites.Count > traps.Count)
-            spriteRenderer.sprite = PlantDefines.PlantSprites[traps.Count];
+        if (spriteRenderer != null)
+            spriteRenderer.sprite = GameDefines.GetCurrentPlantSprites(GetLevel(GameDefines.UpgradeOptions.AddLeaf));
 
         TrapController tc = trap.GetComponent<TrapController>();
         if (tc != null) traps.Add(tc);

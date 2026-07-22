@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -40,8 +40,9 @@ public class TitleUI : BaseUI
     {
         _currentMonth = month;
         monthText.text = $"{month}월";
-        
-        // 월이 바뀌었을 때 목표 에너지 수치도 갱신되도록 다시 호출
+
+        // 월이 바뀌었을 때 목표 에너지 수치도 갱신되도록 재호출
+
         if (PlantController.Data != null)
             updateEnergy(PlantController.Data.CurrentEnergy);
     }
@@ -56,11 +57,7 @@ public class TitleUI : BaseUI
     public void updateEnergy(int energy)
     {
         int requiredEnergy = 0;
-        int monthIndex = _currentMonth - 1;
-        if (GameData.Instance != null && monthIndex >= 0 && monthIndex < GameData.Instance.ClearConstraints.Count)
-        {
-            requiredEnergy = GameData.Instance.ClearConstraints[monthIndex];
-        }
+        requiredEnergy = GameDefines.GetRequiredEnergy(_currentMonth);
 
         energyText.text = $"에너지: {energy} / {requiredEnergy}";
     }

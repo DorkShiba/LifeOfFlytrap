@@ -14,8 +14,8 @@ public class UpgradeButton : BaseUI
     private bool _init = false;
     private TextMeshProUGUI costText, currentLevelText;
     private Button button;
-    private PlantDefines.UpgradeOptions option;
-    private Func<PlantDefines.UpgradeOptions, bool> onClickCallback;
+    private GameDefines.UpgradeOptions option;
+    private Func<GameDefines.UpgradeOptions, bool> onClickCallback;
 
     public override void Init()
     {
@@ -35,7 +35,7 @@ public class UpgradeButton : BaseUI
     /// </summary>
     /// <param name="upgradeOption">이 버튼이 담당하는 업그레이드</param>
     /// <param name="callback">클릭 시 실행할 콜백</param>
-    public void SetInfo(PlantDefines.UpgradeOptions upgradeOption, Func<PlantDefines.UpgradeOptions, bool> callback)
+    public void SetInfo(GameDefines.UpgradeOptions upgradeOption, Func<GameDefines.UpgradeOptions, bool> callback)
     {
         option = upgradeOption;
         onClickCallback = callback;
@@ -46,9 +46,9 @@ public class UpgradeButton : BaseUI
     public void RefreshUI()
     {
         int level = PlantController.GetLevel(option);
-        var costs = PlantDefines.GetUpgradeCosts(option);
+        var costs = GameDefines.GetUpgradeCosts(option);
 
-        if (level >= PlantDefines.MaxUpgradeLevel)
+        if (level >= GameDefines.MaxUpgradeLevel)
         {
             costText.text = "-";
             currentLevelText.text = "MAX";

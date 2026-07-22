@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.IO;
+using UnityEngine;
 
 public class DataManager
 {
@@ -12,35 +12,35 @@ public class DataManager
 
         // GameManager 상태 수집
         data.currentMonth = Managers.Game.CurrentSession?.CurrentMonth ?? 3;
-        data.monthTimer   = Managers.Game.CurrentSession?.MonthTimer ?? 0f;
+        data.monthTimer = Managers.Game.CurrentSession?.MonthTimer ?? 0f;
 
         // PlantData 상태 수집
         PlantData plant = PlantController.Data;
         if (plant != null)
         {
-            data.currentEnergy      = plant.CurrentEnergy;
-            data.biteDamage         = plant.BiteDamage;
+            data.currentEnergy = plant.CurrentEnergy;
+            data.biteDamage = plant.BiteDamage;
             // (향기 수치는 PlantData에서 삭제됨)
-            data.energyRegenRate    = plant.EnergyRegenRate;
-            data.energyCostPerBite  = plant.EnergyCostPerBite;
+            data.energyRegenRate = plant.EnergyRegenRate;
+            data.energyCostPerBite = plant.EnergyCostPerBite;
         }
 
         // 업그레이드 단계 수집
-        data.addLeafLevel    = PlantController.GetLevel(PlantDefines.UpgradeOptions.AddLeaf);
-        data.strongBiteLevel  = PlantController.GetLevel(PlantDefines.UpgradeOptions.StrongBite);
-        data.strongScentLevel = PlantController.GetLevel(PlantDefines.UpgradeOptions.StrongScent);
-        data.deepRootLevel    = PlantController.GetLevel(PlantDefines.UpgradeOptions.DeepRoot);
-        data.sturdyStemLevel  = PlantController.GetLevel(PlantDefines.UpgradeOptions.SturdyStem);
+        data.addLeafLevel = PlantController.GetLevel(GameDefines.UpgradeOptions.AddLeaf);
+        data.strongBiteLevel = PlantController.GetLevel(GameDefines.UpgradeOptions.StrongBite);
+        data.strongScentLevel = PlantController.GetLevel(GameDefines.UpgradeOptions.StrongScent);
+        data.deepRootLevel = PlantController.GetLevel(GameDefines.UpgradeOptions.DeepRoot);
+        data.sturdyStemLevel = PlantController.GetLevel(GameDefines.UpgradeOptions.SturdyStem);
 
         // 월 시작 상태 수집
         if (PlantController.Instance != null)
         {
             data.startMonthEnergy = PlantController.Instance.StartMonthEnergy;
-            data.startMonthAddLeafLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.AddLeaf);
-            data.startMonthStrongBiteLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.StrongBite);
-            data.startMonthStrongScentLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.StrongScent);
-            data.startMonthDeepRootLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.DeepRoot);
-            data.startMonthSturdyStemLevel = PlantController.Instance.GetStartMonthLevel(PlantDefines.UpgradeOptions.SturdyStem);
+            data.startMonthAddLeafLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.AddLeaf);
+            data.startMonthStrongBiteLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.StrongBite);
+            data.startMonthStrongScentLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.StrongScent);
+            data.startMonthDeepRootLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.DeepRoot);
+            data.startMonthSturdyStemLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.SturdyStem);
         }
 
         string json = JsonUtility.ToJson(data, prettyPrint: true);

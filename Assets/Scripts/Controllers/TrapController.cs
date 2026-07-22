@@ -22,10 +22,6 @@ public class TrapController : MonoBehaviour, ITrap
     // 트랩 닫힘 회복 시간
     [SerializeField] private float trapClosedDuration = 5.0f;
 
-    // ─────────────────────────────────────────────
-    // ITrap 구현
-    // ─────────────────────────────────────────────
-
     [Header("ITrap 설정")]
     [Tooltip("벨레가 착지하는 반지름(유닛)")]
     [SerializeField] private float landingRadius = 0.3f;
@@ -39,8 +35,8 @@ public class TrapController : MonoBehaviour, ITrap
             return col != null ? col.size : new Vector2(3.8f, 3.4f);
         }
     }
-    public float LandingRadius => PlantDefines.GetCurrentLandingRadius();
-    // 연타 중이거나 닫혀있으면 착륙 불가
+    public float LandingRadius => GameDefines.GetCurrentLandingRadius();
+    // 연타 중이거나 닫혀있으면 착륙 불가능
     public bool IsAvailable => closeTime <= Util.EPS && !isSnapping;
 
     private float closeTime = 0.0f;
@@ -255,7 +251,7 @@ public class TrapController : MonoBehaviour, ITrap
         float baseCloseTime = trapClosedDuration + maxDigestionTime;
 
         // 튼튼한 줄기 업그레이드 효과 적용: 잎이 다시 열리는 시간 단축 배율 곱하기
-        closeTime = baseCloseTime * PlantDefines.GetTrapReopenTimeMultiplier();
+        closeTime = baseCloseTime * GameDefines.GetTrapReopenTimeMultiplier();
 
         if (anim != null) anim.SetFloat(CloseTimeHash, closeTime);
     }

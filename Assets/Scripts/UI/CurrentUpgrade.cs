@@ -12,7 +12,7 @@ public class CurrentUpgrade : BaseUI
 {
     private bool _init = false;
     private TextMeshProUGUI currentLevelText;
-    private PlantDefines.UpgradeOptions option;
+    private GameDefines.UpgradeOptions option;
 
     public override void Init()
     {
@@ -23,7 +23,7 @@ public class CurrentUpgrade : BaseUI
     }
 
     /// <param name="upgradeOption">담당하는 업그레이드</param>
-    public void SetInfo(PlantDefines.UpgradeOptions upgradeOption)
+    public void SetInfo(GameDefines.UpgradeOptions upgradeOption)
     {
         option = upgradeOption;
         RefreshUI();
@@ -34,12 +34,12 @@ public class CurrentUpgrade : BaseUI
     {
         int level = PlantController.GetLevel(option);
 
-        if (level >= PlantDefines.MaxUpgradeLevel)
+        if (level >= GameDefines.MaxUpgradeLevel)
         {
             currentLevelText.text = "MAX";
             return;
         }
-        
+
         currentLevelText.text = $"현재 레벨 {level}";
     }
 }

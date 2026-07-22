@@ -28,7 +28,7 @@ public class Fly : BugController
         {
             string prefabName = gameObject.name.Replace("(Clone)", "");
             data = Managers.Resource.Load<FlyData>($"GameData/{prefabName}Data");
-            
+
             // 만약 해당 이름의 데이터가 없다면 에러 방지를 위해 기본 FlyData 로드
             if (data == null)
             {
@@ -100,7 +100,7 @@ public class Fly : BugController
         if (checkTimer <= 0f)
         {
             checkTimer = approachCheckInterval;
-            float chance = PlantDefines.GetCurrentLandingChance();
+            float chance = GameDefines.GetCurrentLandingChance();
             if (Random.Range(0f, 100f) < chance)
             {
                 ITrap trap = SelectTrap();

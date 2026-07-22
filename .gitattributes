@@ -1,1 +1,4 @@
 Assets/Resources/Fonts/NeoDunggeunmoPro-Regular[[:space:]]SDF.asset filter=lfs diff=lfs merge=lfs -text
+
+# C# 파일 UTF-8 인코딩 강제
+*.cs text eol=crlf encoding=utf-8

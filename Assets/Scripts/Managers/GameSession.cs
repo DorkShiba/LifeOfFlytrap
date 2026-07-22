@@ -42,21 +42,18 @@ public class GameSession
         if (IsFrozen) return;
 
         monthTimer += deltaTime;
-        
+
         TitleUI title = Managers.Game.Title;
         if (title != null)
             title.updateTime(monthTimer);
-            
+
         if (monthTimer >= MONTH_DURATION)
         {
             monthTimer = MONTH_DURATION;
             int monthIndex = CurrentMonth - 1;
             int requiredEnergy = 0;
-            if (monthIndex >= 0 && monthIndex < GameData.Instance.ClearConstraints.Count)
-            {
-                requiredEnergy = GameData.Instance.ClearConstraints[monthIndex];
-            }
-            
+            requiredEnergy = GameDefines.GetRequiredEnergy(CurrentMonth);
+
             bool isClear = (PlantController.Data != null && PlantController.Data.CurrentEnergy >= requiredEnergy);
             FreezeForEndMonth(isClear);
         }
@@ -110,13 +107,13 @@ public class GameSession
 
         monthTimer = 0f;
         CurrentMonth++;
-        
+
         Managers.TrapLogic?.ClearBugsFromMap();
-        
+
         TitleUI title = Managers.Game.Title;
         if (title != null)
             title.updateMonth(CurrentMonth);
-            
+
         OnMonthChanged?.Invoke(CurrentMonth);
 
         Managers.Data.Save();
@@ -129,7 +126,7 @@ public class GameSession
         Time.timeScale = 1f;
 
         monthTimer = 0f;
-        
+
         Managers.TrapLogic?.ClearBugsFromMap();
 
         SaveData saved = Managers.Data.Load();

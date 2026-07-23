@@ -14,59 +14,7 @@ public class PlantController : MonoBehaviour
     /// <summary>각 업그레이드의 현재 구매 횟수 (0 = 미구매)</summary>
     private Dictionary<GameDefines.UpgradeOptions, int> upgradeLevels;
 
-    // 월 시작 시점의 에너지와 업그레이드 레벨
-    public int StartMonthEnergy { get; private set; }
-    private Dictionary<GameDefines.UpgradeOptions, int> startMonthUpgradeLevels;
-
-    public int GetStartMonthLevel(GameDefines.UpgradeOptions option)
-    {
-        if (startMonthUpgradeLevels == null) return 1;
-        return startMonthUpgradeLevels.TryGetValue(option, out int level) ? level : 1;
-    }
-
-    public void UpdateStartMonthState()
-    {
-        if (data != null)
-            StartMonthEnergy = data.CurrentEnergy;
-
-        if (upgradeLevels != null)
-        {
-            foreach (var kvp in upgradeLevels)
-            {
-                startMonthUpgradeLevels[kvp.Key] = kvp.Value;
-            }
-        }
-    }
-
-    public void RestoreStartMonthState()
-    {
-        if (data != null)
-            data.CurrentEnergy = StartMonthEnergy;
-
-        if (upgradeLevels != null && startMonthUpgradeLevels != null)
-        {
-            var keys = new System.Collections.Generic.List<GameDefines.UpgradeOptions>(startMonthUpgradeLevels.Keys);
-            foreach (var key in keys)
-            {
-                upgradeLevels[key] = startMonthUpgradeLevels[key];
-            }
-        }
-
-        int trapCount = upgradeLevels[GameDefines.UpgradeOptions.AddLeaf];
-        while (traps.Count > trapCount)
-        {
-            var trap = traps[traps.Count - 1];
-            traps.RemoveAt(traps.Count - 1);
-            if (Managers.TrapLogic.traps.Contains(trap.gameObject))
-                Managers.TrapLogic.traps.Remove(trap.gameObject);
-            Destroy(trap.gameObject);
-        }
-
-        if (spriteRenderer != null)
-            spriteRenderer.sprite = GameDefines.GetCurrentPlantSprites(GetLevel(GameDefines.UpgradeOptions.AddLeaf));
-
-        Managers.Game.Title?.updateEnergy(data.CurrentEnergy);
-    }
+    // 월 시작 상태 로직 제거됨 (게임 오버 시 전체 재시작)
 
     void Start()
     {
@@ -86,15 +34,7 @@ public class PlantController : MonoBehaviour
             { GameDefines.UpgradeOptions.SturdyStem,  1 },
         };
 
-        startMonthUpgradeLevels = new Dictionary<GameDefines.UpgradeOptions, int>
-        {
-            { GameDefines.UpgradeOptions.AddLeaf,     1 },
-            { GameDefines.UpgradeOptions.StrongBite,  1 },
-            { GameDefines.UpgradeOptions.StrongScent, 1 },
-            { GameDefines.UpgradeOptions.DeepRoot,    1 },
-            { GameDefines.UpgradeOptions.SturdyStem,  1 },
-        };
-        StartMonthEnergy = data.CurrentEnergy;
+        // StartMonth 초기화 제거됨
 
         // 2. 세이브 데이터 로드 시도
         SaveData saved = Managers.Data.Load();
@@ -113,13 +53,7 @@ public class PlantController : MonoBehaviour
             upgradeLevels[GameDefines.UpgradeOptions.DeepRoot] = Mathf.Max(1, saved.deepRootLevel);
             upgradeLevels[GameDefines.UpgradeOptions.SturdyStem] = Mathf.Max(1, saved.sturdyStemLevel);
 
-            // 월 시작 상태 복원
-            StartMonthEnergy = saved.startMonthEnergy;
-            startMonthUpgradeLevels[GameDefines.UpgradeOptions.AddLeaf] = Mathf.Max(1, saved.startMonthAddLeafLevel);
-            startMonthUpgradeLevels[GameDefines.UpgradeOptions.StrongBite] = Mathf.Max(1, saved.startMonthStrongBiteLevel);
-            startMonthUpgradeLevels[GameDefines.UpgradeOptions.StrongScent] = Mathf.Max(1, saved.startMonthStrongScentLevel);
-            startMonthUpgradeLevels[GameDefines.UpgradeOptions.DeepRoot] = Mathf.Max(1, saved.startMonthDeepRootLevel);
-            startMonthUpgradeLevels[GameDefines.UpgradeOptions.SturdyStem] = Mathf.Max(1, saved.startMonthSturdyStemLevel);
+            // 월 시작 상태 복원 로직 제거됨
 
             // 업그레이드 복원: AddLeaf 레벨만큼 업그레이드 생성
             int trapCount = upgradeLevels[GameDefines.UpgradeOptions.AddLeaf];
@@ -260,7 +194,6 @@ public class PlantController : MonoBehaviour
 
     void HandleMonthChange(int newMonth)
     {
-        // 월 변경 시 업그레이드 효과 예약 (추후 구현)
-        UpdateStartMonthState();
+        // 월 변경 시 특별히 처리할 사항이 있다면 여기에 작성
     }
 }

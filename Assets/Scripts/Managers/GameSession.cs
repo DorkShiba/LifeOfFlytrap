@@ -139,11 +139,6 @@ public class GameSession
             CurrentMonth = 3;
         }
 
-        if (PlantController.Instance != null)
-        {
-            PlantController.Instance.RestoreStartMonthState();
-        }
-
         TitleUI title = Managers.Game.Title;
         if (title != null)
         {

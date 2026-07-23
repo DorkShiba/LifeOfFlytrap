@@ -96,8 +96,41 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7671572892829917951, guid: d7b5e27948471cd44ab7ea26b80c4b92, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5604491251759432171, guid: d7b5e27948471cd44ab7ea26b80c4b92, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7145257635852477320}
   m_SourcePrefab: {fileID: 100100000, guid: d7b5e27948471cd44ab7ea26b80c4b92, type: 3}
+--- !u!114 &5952575218695635191 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5327338578285156990, guid: d7b5e27948471cd44ab7ea26b80c4b92, type: 3}
+  m_PrefabInstance: {fileID: 1978568604547701385}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6247177338701323106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!1 &6247177338701323106 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5604491251759432171, guid: d7b5e27948471cd44ab7ea26b80c4b92, type: 3}
+  m_PrefabInstance: {fileID: 1978568604547701385}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7145257635852477320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6247177338701323106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc503569dcb385e439714d95f5960437, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveButton
+  button: {fileID: 5952575218695635191}

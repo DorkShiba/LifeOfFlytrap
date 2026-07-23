@@ -8,9 +8,25 @@ enum SaveSlotNames
     SaveSlot3,
 }
 
+public enum SaveListMode
+{
+    Save,
+    Load
+}
+
 public class SaveList : Popup
 {
+    public SaveListMode CurrentMode { get; private set; }
     private SaveSlot saveSlot1, saveSlot2, saveSlot3;
+
+    public void SetMode(SaveListMode mode)
+    {
+        CurrentMode = mode;
+        // 슬롯들의 UI 갱신 (모드에 따라 interactable 상태가 달라질 수 있음)
+        if (saveSlot1 != null) saveSlot1.RefreshUI();
+        if (saveSlot2 != null) saveSlot2.RefreshUI();
+        if (saveSlot3 != null) saveSlot3.RefreshUI();
+    }
 
     public override void Init()
     {
@@ -24,6 +40,11 @@ public class SaveList : Popup
         saveSlot1 = Get<SaveSlot>(0);
         saveSlot2 = Get<SaveSlot>(1);
         saveSlot3 = Get<SaveSlot>(2);
+
+        // 각 슬롯에 인덱스와 SaveList(this) 참조를 전달하여 초기화
+        saveSlot1.SetInfo(1, this);
+        saveSlot2.SetInfo(2, this);
+        saveSlot3.SetInfo(3, this);
     }
 
     private GameObject _blocker;

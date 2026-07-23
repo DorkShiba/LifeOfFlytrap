@@ -3,10 +3,16 @@ using UnityEngine;
 
 public class DataManager
 {
-    private static string SavePath =>
-        Path.Combine(Application.persistentDataPath, "save.json");
+    public int CurrentSlotIndex { get; set; } = 1;
 
-    public void Save()
+    public static string GetSavePath(int slotIndex)
+    {
+        return Path.Combine(Application.persistentDataPath, $"save_{slotIndex}.json");
+    }
+
+    public void Save() => Save(CurrentSlotIndex);
+
+    public void Save(int slotIndex)
     {
         SaveData data = new SaveData();
 
@@ -32,44 +38,42 @@ public class DataManager
         data.deepRootLevel = PlantController.GetLevel(GameDefines.UpgradeOptions.DeepRoot);
         data.sturdyStemLevel = PlantController.GetLevel(GameDefines.UpgradeOptions.SturdyStem);
 
-        // 월 시작 상태 수집
-        if (PlantController.Instance != null)
-        {
-            data.startMonthEnergy = PlantController.Instance.StartMonthEnergy;
-            data.startMonthAddLeafLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.AddLeaf);
-            data.startMonthStrongBiteLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.StrongBite);
-            data.startMonthStrongScentLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.StrongScent);
-            data.startMonthDeepRootLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.DeepRoot);
-            data.startMonthSturdyStemLevel = PlantController.Instance.GetStartMonthLevel(GameDefines.UpgradeOptions.SturdyStem);
-        }
-
         string json = JsonUtility.ToJson(data, prettyPrint: true);
-        File.WriteAllText(SavePath, json);
-        Debug.Log($"[DataManager] 저장 완료 → {SavePath}");
+        string savePath = GetSavePath(slotIndex);
+        File.WriteAllText(savePath, json);
+        Debug.Log($"[DataManager] 저장 완료 → {savePath}");
     }
 
-    public SaveData Load()
+    public SaveData Load() => Load(CurrentSlotIndex);
+
+    public SaveData Load(int slotIndex)
     {
-        if (!File.Exists(SavePath))
+        string savePath = GetSavePath(slotIndex);
+        if (!File.Exists(savePath))
         {
-            Debug.Log("[DataManager] 세이브 파일 없음. 새 게임으로 시작.");
+            Debug.Log($"[DataManager] 세이브 파일 없음 ({savePath}). 새 게임으로 시작.");
             return null;
         }
 
-        string json = File.ReadAllText(SavePath);
+        string json = File.ReadAllText(savePath);
         SaveData data = JsonUtility.FromJson<SaveData>(json);
         Debug.Log($"[DataManager] 로드 완료 → Month {data.currentMonth}");
         return data;
     }
 
-    public bool HasSaveFile() => File.Exists(SavePath);
+    public bool HasSaveFile() => HasSaveFile(CurrentSlotIndex);
 
-    public void DeleteSave()
+    public bool HasSaveFile(int slotIndex) => File.Exists(GetSavePath(slotIndex));
+
+    public void DeleteSave() => DeleteSave(CurrentSlotIndex);
+
+    public void DeleteSave(int slotIndex)
     {
-        if (File.Exists(SavePath))
+        string savePath = GetSavePath(slotIndex);
+        if (File.Exists(savePath))
         {
-            File.Delete(SavePath);
-            Debug.Log("[DataManager] 세이브 파일 삭제 완료.");
+            File.Delete(savePath);
+            Debug.Log($"[DataManager] 세이브 파일 삭제 완료 ({savePath}).");
         }
     }
 }

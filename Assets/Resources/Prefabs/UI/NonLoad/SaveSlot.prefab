@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7839774087275539860}
   - component: {fileID: 8479315367340056586}
   - component: {fileID: 777311358305669480}
+  - component: {fileID: 150698481493426404}
   m_Layer: 5
   m_Name: SaveSlot
   m_TagString: Untagged
@@ -92,6 +93,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81d430a51274dfb46b16c745dd0f89cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaveSlot
+  slotIndex: 0
+--- !u!114 &150698481493426404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226950161672930460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_PressedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 1, g: 1, b: 1, a: 1}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 8479315367340056586}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2863173361247933129
 GameObject:
   m_ObjectHideFlags: 0
@@ -261,10 +307,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 141092739274190364}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 175, y: -60.00003}
-  m_SizeDelta: {x: -350, y: -119.99994}
+  m_AnchorMin: {x: 0.55, y: 0}
+  m_AnchorMax: {x: 1, y: 0.4}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7573440004131390088
 CanvasRenderer:
@@ -294,7 +340,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "2026\uB144 7\uC6D4 14\uC77C"
+  m_text: "2026\uB144 11\uC6D4 14\uC77C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 722ca3d71c26d914c9c9aad67b2ae11a, type: 2}
   m_sharedMaterial: {fileID: 7161486171550146609, guid: 722ca3d71c26d914c9c9aad67b2ae11a, type: 2}
@@ -473,10 +519,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 141092739274190364}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0.45, y: 0.65}
+  m_AnchorMax: {x: 1, y: 0.95}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9222911142916921587
 CanvasRenderer:
@@ -506,7 +552,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "3\uC6D4 | 00:00 | 0 \uC5D0\uB108\uC9C0"
+  m_text: "3\uC6D4 | 00:00 | 100 \uC5D0\uB108\uC9C0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 722ca3d71c26d914c9c9aad67b2ae11a, type: 2}
   m_sharedMaterial: {fileID: 7161486171550146609, guid: 722ca3d71c26d914c9c9aad67b2ae11a, type: 2}
@@ -540,8 +586,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -572,7 +618,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: -0.6390381, y: 0, z: -1.5488281, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

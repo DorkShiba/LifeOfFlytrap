@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LoadButton : MenuButton
+public class SaveButton : MenuButton
 {
     private SaveList saveList;
     protected override void OnClicked()
@@ -11,6 +11,6 @@ public class LoadButton : MenuButton
         base.OnClicked();
         if (saveList != null) return;
         saveList = Managers.UI.ShowPopupUI<SaveList>();
-        saveList.SetMode(SaveListMode.Load);
+        saveList.SetMode(SaveListMode.Save);
     }
 }

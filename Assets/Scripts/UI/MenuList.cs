@@ -1,11 +1,12 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 enum MenuButtons
 {
     SaveButton,
-    LoadButton,
+    ToTitleButton,
+    GameOverButton,
 }
 
 public class MenuList : BaseUI
@@ -15,18 +16,34 @@ public class MenuList : BaseUI
     {
         Init();
     }
-    private MenuButton saveButton, loadButton;
+    private MenuButton saveButton, toTitleButton, gameOverButton;
 
     public override void Init()
     {
         if (_init) return;
         _init = true;
         Bind<MenuButton>(typeof(MenuButtons));
-        saveButton    = Get<MenuButton>(0);
-        loadButton  = Get<MenuButton>(1);
+        saveButton = Get<MenuButton>(0);
+        toTitleButton = Get<MenuButton>(1);
+        gameOverButton = Get<MenuButton>(2);
 
         // 각 버튼 Init() 먼저 호출 (costText 등 바인딩)
-        saveButton   .Init();
-        loadButton .Init();
+        saveButton.Init();
+        toTitleButton.Init();
+        gameOverButton.Init();
+
+        // 굳이 새 스크립트를 만들지 않고, 여기서 람다 함수로 이벤트를 바로 연결합니다.
+        if (gameOverButton.button != null)
+        {
+            gameOverButton.button.onClick.AddListener(() =>
+            {
+                Debug.Log("게임 종료!");
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+#else
+                Application.Quit();
+#endif
+            });
+        }
     }
 }

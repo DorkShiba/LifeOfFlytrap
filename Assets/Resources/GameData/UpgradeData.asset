@@ -23,15 +23,15 @@ MonoBehaviour:
     Costs: 000000000a000000140000001e00000028000000320000003c000000
   - Option: 4
     Costs: 000000000a000000140000001e00000028000000320000003c000000
-  LandingChanceByLevel:
+  LandingChanceBonusByLevel:
   - 0
-  - 30
-  - 40
-  - 50
-  - 60
-  - 70
-  - 80
-  - 90
+  - 0
+  - 5
+  - 8
+  - 10
+  - 13
+  - 15
+  - 20
   LandingRadiusByLevel:
   - 0
   - 0.3
@@ -42,6 +42,15 @@ MonoBehaviour:
   - 0.55
   - 0.6
   EnergyRegenRateByLevel: 0000000000000000030000000500000007000000090000000b0000000d000000
+  TrapReopenTimeMultiplierByLevel:
+  - 1
+  - 1
+  - 0.9
+  - 0.8
+  - 0.7
+  - 0.6
+  - 0.5
+  - 0.4
   TrapPositions:
   - {x: -1.75, y: 2.15, z: 0}
   - {x: 4, y: -1.9, z: 0}
